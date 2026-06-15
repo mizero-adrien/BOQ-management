@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 import { usePMProjects } from '@/hooks/usePMProjects'
 import { usePMTasks } from '@/hooks/usePMTasks'

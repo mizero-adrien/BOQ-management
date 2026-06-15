@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useProfile } from '@/hooks/useProfile'
 import { useTodayTasks } from '@/hooks/useTodayTasks'
 import Link from 'next/link'

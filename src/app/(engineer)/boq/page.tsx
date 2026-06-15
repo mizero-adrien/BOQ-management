@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useBOQSections, type SectionWithItems } from '@/hooks/useBOQSections'
 import Link from 'next/link'

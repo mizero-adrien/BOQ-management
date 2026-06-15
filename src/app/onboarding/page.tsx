@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import StepIndicator from '@/components/onboarding/StepIndicator'
@@ -9,10 +9,12 @@ import ProjectStep from '@/components/onboarding/ProjectStep'
 import InviteStep from '@/components/onboarding/InviteStep'
 import DemoProjectBanner from '@/components/onboarding/DemoProjectBanner'
 
+export const dynamic = 'force-dynamic'
+
 type Step = 1 | 2 | 3
 type ExistingMembership = { company_id: string }
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
   const [companyId, setCompanyId] = useState('')
@@ -102,5 +104,13 @@ export default function OnboardingPage() {
         <InviteStep companyId={companyId} projectId={projectId} demoLoaded={demoLoaded} />
       )}
     </>
+  )
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <OnboardingContent />
+    </Suspense>
   )
 }

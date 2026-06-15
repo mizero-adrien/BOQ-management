@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -32,7 +32,7 @@ const signupSchema = z.object({
 
 type SignupFormData = z.infer<typeof signupSchema>
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -135,7 +135,6 @@ export default function SignupPage() {
             id="full_name"
             type="text"
             autoComplete="name"
-            placeholder="Jean Mugisha"
             className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
             style={{
               backgroundColor: '#F5F6FA',
@@ -165,7 +164,6 @@ export default function SignupPage() {
             type="email"
             autoComplete="email"
             autoCapitalize="none"
-            placeholder="your@email.com"
             className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
             style={{
               backgroundColor: '#F5F6FA',
@@ -195,7 +193,6 @@ export default function SignupPage() {
               id="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
-              placeholder="At least 8 characters"
               className="w-full px-4 pr-10 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
                 backgroundColor: '#F5F6FA',
@@ -234,7 +231,6 @@ export default function SignupPage() {
               id="confirm_password"
               type={showConfirm ? 'text' : 'password'}
               autoComplete="new-password"
-              placeholder="Repeat your password"
               className="w-full px-4 pr-10 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
                 backgroundColor: '#F5F6FA',
@@ -284,6 +280,20 @@ export default function SignupPage() {
       </p>
 
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#00236F', animation: 'spin 0.8s linear infinite' }} />
+        </div>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   )
 }
 

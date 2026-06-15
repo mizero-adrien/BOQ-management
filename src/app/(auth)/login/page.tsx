@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,7 +22,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -64,7 +64,6 @@ export default function LoginPage() {
   return (
     <div className="w-full">
 
-      {/* Logo and title */}
       <div className="flex flex-col items-center mb-8">
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
@@ -83,7 +82,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Server error */}
       {serverError && (
         <div
           className="mb-4 px-4 py-3 rounded-lg border text-sm text-red-700"
@@ -93,7 +91,6 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
         <GoogleSignInButton
@@ -111,7 +108,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Email field */}
         <div className="mb-4">
           <label
             htmlFor="email"
@@ -128,7 +124,6 @@ export default function LoginPage() {
               type="email"
               autoComplete="email"
               autoCapitalize="none"
-              placeholder="your@email.com"
               className="w-full pl-9 pr-4 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
                 backgroundColor: '#F5F6FA',
@@ -158,7 +153,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Password field */}
         <div className="mb-2">
           <label
             htmlFor="password"
@@ -174,7 +168,6 @@ export default function LoginPage() {
               id="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              placeholder="Enter your password"
               className="w-full pl-9 pr-10 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
                 backgroundColor: '#F5F6FA',
@@ -212,7 +205,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Forgot password */}
         <div className="flex justify-end mb-6">
           <Link
             href="/forgot-password"
@@ -223,7 +215,6 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Submit button */}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -235,7 +226,6 @@ export default function LoginPage() {
 
       </form>
 
-      {/* Sign up link */}
       <p className="text-center text-sm text-gray-500 mt-6">
         Do not have an account?{' '}
         <Link
@@ -248,6 +238,20 @@ export default function LoginPage() {
       </p>
 
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#00236F', animation: 'spin 0.8s linear infinite' }} />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   )
 }
 

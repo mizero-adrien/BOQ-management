@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import type { Project, PlanZone } from '@/types/database'
 import ShareHeader from '@/components/share/ShareHeader'

@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { getRedirectPath } from '@/lib/utils/getRedirectPath'
 
-export default function RedirectPage() {
+export const dynamic = 'force-dynamic'
+
+function RedirectContent() {
   const router = useRouter()
 
   useEffect(() => {
@@ -43,5 +45,13 @@ export default function RedirectPage() {
         />
       </div>
     </div>
+  )
+}
+
+export default function RedirectPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <RedirectContent />
+    </Suspense>
   )
 }

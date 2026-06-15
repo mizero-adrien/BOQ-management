@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useNotificationContext as useNotifications } from '@/contexts/NotificationContext'
 import { useRouter } from 'next/navigation'
 import { getRelativeTime } from '@/lib/utils'

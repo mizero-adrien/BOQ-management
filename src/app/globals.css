@@ -53,6 +53,11 @@
   }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @layer components {
   .btn-primary {
     @apply bg-primary text-white font-semibold text-sm py-3 px-4 rounded-lg w-full text-center transition-opacity active:opacity-80;
