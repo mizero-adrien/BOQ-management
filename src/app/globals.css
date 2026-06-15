@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  --color-primary: #00236F;
+  --color-primary-dark: #001A52;
+  --color-primary-light: #0A3080;
+
+  --color-accent: #778EDE;
+  --color-accent-light: #E4E9FA;
+  --color-accent-dark: #5670C4;
+
+  --color-surface: #F5F6FA;
+  --color-border: #EEEEEE;
+  --color-muted: #666666;
+  --color-faint: #BBBBBB;
+
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+}
+
+@utility text-2xs {
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white font-semibold text-sm py-3 px-4 rounded-lg w-full text-center transition-opacity active:opacity-80;
+  }
+
+  .btn-outline {
+    @apply bg-white text-primary font-semibold text-sm py-3 px-4 rounded-lg w-full text-center border border-primary transition-opacity active:opacity-80;
+  }
+
+  .input-field {
+    @apply bg-surface border border-border rounded-lg px-3 py-2.5 text-sm text-gray-900 w-full outline-none focus:border-primary transition-colors placeholder:text-faint;
+  }
+
+  .card {
+    @apply bg-white rounded-lg border border-border;
+  }
+
+  .section-label {
+    @apply text-2xs text-faint uppercase tracking-wider font-semibold;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
