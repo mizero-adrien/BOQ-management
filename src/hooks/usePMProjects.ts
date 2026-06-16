@@ -10,46 +10,41 @@ export function usePMProjects() {
 
   useEffect(() => {
     const supabase = createClient()
-    let cancelled = false
+    const controller = new AbortController()
 
     const timeout = setTimeout(() => {
-      if (!cancelled) {
-        console.error('PM projects error: timed out after 8 seconds')
-        setLoading(false)
-      }
+      controller.abort()
+      setLoading(false)
+      console.error('usePMProjects: query timed out after 8 s')
     }, 8000)
 
     async function fetchProjects() {
       try {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-        if (userError) {
-          console.error('PM projects error: getUser failed:', userError.message)
-          return
-        }
-
-        if (!user) {
-          return
-        }
+        if (userError || !user) return
 
         const { data, error } = await supabase
           .from('projects')
           .select('*')
           .eq('pm_id', user.id)
           .order('created_at', { ascending: false })
+          .abortSignal(controller.signal)
+
+        if (controller.signal.aborted) return
 
         if (error) {
-          console.error('PM projects error: fetch failed:', error.message)
+          console.error('usePMProjects: fetch failed:', error.message)
           return
         }
 
-        if (!cancelled) {
-          setProjects(data ?? [])
-        }
+        setProjects(data ?? [])
       } catch (err) {
-        console.error('PM projects error: unexpected error:', err)
+        if (!controller.signal.aborted) {
+          console.error('usePMProjects: unexpected error:', err)
+        }
       } finally {
-        if (!cancelled) {
+        if (!controller.signal.aborted) {
           clearTimeout(timeout)
           setLoading(false)
         }
@@ -59,7 +54,7 @@ export function usePMProjects() {
     fetchProjects()
 
     return () => {
-      cancelled = true
+      controller.abort()
       clearTimeout(timeout)
     }
   }, [])

@@ -66,8 +66,12 @@ function SignupForm() {
       return
     }
 
-    const next = new URLSearchParams(window.location.search).get('next')
-    router.push(next ?? '/onboarding')
+    const inviteToken = searchParams.get('invite')
+    if (inviteToken) {
+      router.push('/invite/' + inviteToken)
+    } else {
+      router.push('/onboarding')
+    }
     router.refresh()
   }
 

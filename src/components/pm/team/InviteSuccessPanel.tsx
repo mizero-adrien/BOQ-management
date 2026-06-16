@@ -5,10 +5,25 @@ import { useState } from 'react'
 interface Props {
   inviteLink: string
   message: string
+  projectName: string
+  inviteeEmail: string
+  role: string
   onCreateAnother: () => void
 }
 
-export default function InviteSuccessPanel({ inviteLink, message, onCreateAnother }: Props) {
+function formatRole(role: string): string {
+  const map: Record<string, string> = {
+    engineer: 'Site Engineer',
+    pm: 'Project Manager',
+    foreman: 'Foreman',
+    qs: 'Quantity Surveyor',
+    storekeeper: 'Storekeeper',
+    owner: 'Owner / Client',
+  }
+  return map[role] ?? role
+}
+
+export default function InviteSuccessPanel({ inviteLink, message, projectName, inviteeEmail, role, onCreateAnother }: Props) {
   const [linkCopied, setLinkCopied] = useState(false)
   const [messageCopied, setMessageCopied] = useState(false)
 
@@ -35,8 +50,12 @@ export default function InviteSuccessPanel({ inviteLink, message, onCreateAnothe
   return (
     <div style={{ maxWidth: '480px' }}>
       <div style={{ backgroundColor: '#E4E9FA', border: '1px solid #C8D4F8', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px' }}>
-        <p style={{ fontSize: '13px', fontWeight: '600', color: '#00236F', marginBottom: '2px' }}>Invitation link created</p>
-        <p style={{ fontSize: '12px', color: '#00236F' }}>Share this link with your team member via WhatsApp, SMS, or email.</p>
+        <p style={{ fontSize: '13px', fontWeight: '600', color: '#00236F', marginBottom: '4px' }}>
+          Invitation created for {projectName}
+        </p>
+        <p style={{ fontSize: '13px', color: '#666666' }}>
+          {inviteeEmail} will join {projectName} as {formatRole(role)}
+        </p>
       </div>
 
       <div style={{ marginBottom: '16px' }}>
@@ -47,7 +66,7 @@ export default function InviteSuccessPanel({ inviteLink, message, onCreateAnothe
         <button
           type="button"
           onClick={copyLink}
-          style={{ width: '100%', padding: '10px', backgroundColor: linkCopied ? '#E4E9FA' : '#fff', border: '1.5px solid #00236F', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#00236F', cursor: 'pointer' }}
+          style={{ width: '100%', padding: '10px', backgroundColor: linkCopied ? '#E4E9FA' : '#FFFFFF', border: '1.5px solid #00236F', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#00236F', cursor: 'pointer' }}
         >
           {linkCopied ? 'Copied' : 'Copy link'}
         </button>
@@ -67,21 +86,21 @@ export default function InviteSuccessPanel({ inviteLink, message, onCreateAnothe
         <button
           type="button"
           onClick={shareWhatsApp}
-          style={{ flex: 1, padding: '10px', backgroundColor: '#25D366', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+          style={{ flex: 1, padding: '10px', backgroundColor: '#25D366', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#FFFFFF', cursor: 'pointer' }}
         >
           WhatsApp
         </button>
         <button
           type="button"
           onClick={copyMessage}
-          style={{ flex: 1, padding: '10px', backgroundColor: messageCopied ? '#E4E9FA' : '#fff', border: '1.5px solid #00236F', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#00236F', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '10px', backgroundColor: messageCopied ? '#E4E9FA' : '#FFFFFF', border: '1.5px solid #00236F', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#00236F', cursor: 'pointer' }}
         >
           {messageCopied ? 'Copied' : 'Copy message'}
         </button>
         <button
           type="button"
           onClick={shareEmail}
-          style={{ flex: 1, padding: '10px', backgroundColor: '#fff', border: '1px solid #EEEEEE', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#666666', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '10px', backgroundColor: '#FFFFFF', border: '1px solid #EEEEEE', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#666666', cursor: 'pointer' }}
         >
           Email
         </button>

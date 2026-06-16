@@ -50,8 +50,13 @@ function LoginForm() {
       return
     }
 
-    const next = new URLSearchParams(window.location.search).get('next')
-    router.push(next ?? '/onboarding')
+    const inviteToken = searchParams.get('invite')
+    if (inviteToken) {
+      router.push('/invite/' + inviteToken)
+    } else {
+      const next = searchParams.get('next')
+      router.push(next ?? '/redirect')
+    }
     router.refresh()
   }
 
