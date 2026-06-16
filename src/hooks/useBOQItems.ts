@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { BOQItem } from '@/types/database'
+import type { BOQItemView } from '@/types/database'
 
 export function useBOQItems(sectionId: string | undefined) {
-  const [items, setItems] = useState<BOQItem[]>([])
+  const [items, setItems] = useState<BOQItemView[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -25,21 +25,16 @@ export function useBOQItems(sectionId: string | undefined) {
 
     async function fetchItems() {
       const supabase = createClient()
-
       try {
         const { data, error } = await supabase
-          .from('boq_items')
-          .select('*')
-          .eq('section_id', sectionId)
-          .order('order_index', { ascending: true })
+          .rpc('get_boq_items_for_role', { p_section_id: sectionId })
 
         if (error) {
           console.error('BOQ items error:', error.message)
           return
         }
-
         if (!cancelled) {
-          setItems(data ?? [])
+          setItems((data ?? []) as BOQItemView[])
         }
       } catch (err) {
         console.error('BOQ items error: unexpected error:', err)
@@ -52,11 +47,7 @@ export function useBOQItems(sectionId: string | undefined) {
     }
 
     fetchItems()
-
-    return () => {
-      cancelled = true
-      clearTimeout(timeout)
-    }
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [sectionId])
 
   return { items, loading }

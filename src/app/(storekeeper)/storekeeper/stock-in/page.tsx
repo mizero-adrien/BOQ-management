@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useBOQSections } from '@/hooks/useBOQSections'
 import { createClient } from '@/lib/supabase/client'
-import type { BOQItem } from '@/types/database'
+import type { BOQItemView } from '@/types/database'
 
 export default function StockInPage() {
   const router = useRouter()
   const { project } = useActiveProject()
   const { sections } = useBOQSections(project?.id)
 
-  const allItems: BOQItem[] = sections.flatMap((s) => s.items)
+  const allItems: BOQItemView[] = sections.flatMap((s) => s.items)
 
   const [itemId, setItemId] = useState('')
   const [qty, setQty] = useState('')

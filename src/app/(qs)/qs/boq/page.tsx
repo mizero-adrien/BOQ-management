@@ -5,18 +5,18 @@ import { useActiveProject } from '@/hooks/useActiveProject'
 import { useBOQSections } from '@/hooks/useBOQSections'
 import { formatCurrency } from '@/lib/utils/index'
 import { createClient } from '@/lib/supabase/client'
-import type { BOQItem } from '@/types/database'
+import type { BOQItemView } from '@/types/database'
 
-function EditRow({ item, onSave }: { item: BOQItem; onSave: (id: string, rate: number, qty: number) => void }) {
+function EditRow({ item, onSave }: { item: BOQItemView; onSave: (id: string, rate: number, qty: number) => void }) {
   const [editing, setEditing] = useState(false)
-  const [rate, setRate] = useState(String(item.unit_rate))
+  const [rate, setRate] = useState(String(item.unit_rate ?? 0))
   const [qty, setQty] = useState(String(item.quantity))
 
   async function save() {
     const r = Number(rate); const q = Number(qty)
     if (isNaN(r) || isNaN(q)) return
     const supabase = createClient()
-    await supabase.from('boq_items').update({ unit_rate: r, quantity: q, budgeted_total: r * q }).eq('id', item.id)
+    await supabase.from('boq_items').update({ unit_rate: r, quantity: q, budgeted_total: r * q } as Record<string, number>).eq('id', item.id)
     onSave(item.id, r, q)
     setEditing(false)
   }
@@ -43,12 +43,12 @@ function EditRow({ item, onSave }: { item: BOQItem; onSave: (id: string, rate: n
             </div>
           ) : (
             <p className="text-xs mt-0.5" style={{ color: '#666666' }}>
-              {item.quantity} {item.unit} × {formatCurrency(item.unit_rate)} = {formatCurrency(item.budgeted_total)}
+              {item.quantity} {item.unit} × {formatCurrency(item.unit_rate ?? 0)} = {formatCurrency(item.budgeted_total ?? 0)}
             </p>
           )}
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="text-xs" style={{ color: '#666666' }}>Used: {formatCurrency(item.used_total)}</p>
+          <p className="text-xs" style={{ color: '#666666' }}>Used: {formatCurrency(item.used_total ?? 0)}</p>
           {editing ? (
             <div className="flex gap-1 mt-1">
               <button type="button" onClick={save} className="text-xs px-2.5 py-1 rounded-lg text-white" style={{ backgroundColor: '#00236F' }}>Save</button>

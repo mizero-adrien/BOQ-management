@@ -7,6 +7,7 @@ import { useBOQItems } from '@/hooks/useBOQItems'
 import { formatCurrency } from '@/lib/utils'
 import ItemRow from '@/components/boq/ItemRow'
 import BudgetProgressBar from '@/components/boq/BudgetProgressBar'
+import TodayLogsSection from '@/components/boq/TodayLogsSection'
 
 export default function SectionDetailPage({
   params,
@@ -105,6 +106,8 @@ export default function SectionDetailPage({
             </p>
           )}
         </div>
+
+        <TodayLogsSection sectionId={sectionId} />
 
         {/* Items list */}
         {items.length === 0 ? (

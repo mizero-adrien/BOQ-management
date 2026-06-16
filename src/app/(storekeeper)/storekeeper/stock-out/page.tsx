@@ -6,7 +6,7 @@ import { useActiveProject } from '@/hooks/useActiveProject'
 import { useBOQSections } from '@/hooks/useBOQSections'
 import { useProjectMembers } from '@/hooks/useProjectMembers'
 import { createClient } from '@/lib/supabase/client'
-import type { BOQItem } from '@/types/database'
+import type { BOQItemView } from '@/types/database'
 
 export default function StockOutPage() {
   const router = useRouter()
@@ -14,7 +14,7 @@ export default function StockOutPage() {
   const { sections } = useBOQSections(project?.id)
   const { members } = useProjectMembers(project?.id)
 
-  const allItems: BOQItem[] = sections.flatMap((s) => s.items)
+  const allItems: BOQItemView[] = sections.flatMap((s) => s.items)
   const engineers = members.filter((m) => ['engineer', 'foreman'].includes(m.role))
 
   const [itemId, setItemId] = useState('')
@@ -42,7 +42,7 @@ export default function StockOutPage() {
     setSubmitting(true); setError(null)
 
     const supabase = createClient()
-    const costRwf = qty * Number(selectedItem.unit_rate)
+    const costRwf = qty * Number(selectedItem.unit_rate ?? 0)
     const notesStr = `Issued to ${selectedEngineer?.fullName ?? 'Unknown'}${notes ? ` — ${notes}` : ''}`
 
     const { error: err } = await supabase.from('material_logs').insert({

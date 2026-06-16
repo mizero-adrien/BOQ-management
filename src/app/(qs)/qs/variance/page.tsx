@@ -3,12 +3,12 @@
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useBOQSections } from '@/hooks/useBOQSections'
 import { formatCurrency } from '@/lib/utils/index'
-import type { BOQItem } from '@/types/database'
+import type { BOQItemView } from '@/types/database'
 
-function VarianceRow({ item }: { item: BOQItem }) {
-  const usedQty = item.quantity > 0 ? (item.used_total / item.unit_rate) : 0
-  const variance = item.budgeted_total - item.used_total
-  const variancePct = item.budgeted_total > 0 ? Math.round((variance / item.budgeted_total) * 100) : 0
+function VarianceRow({ item }: { item: BOQItemView }) {
+  const usedQty = item.quantity > 0 && (item.unit_rate ?? 0) > 0 ? ((item.used_total ?? 0) / item.unit_rate!) : 0
+  const variance = (item.budgeted_total ?? 0) - (item.used_total ?? 0)
+  const variancePct = (item.budgeted_total ?? 0) > 0 ? Math.round((variance / item.budgeted_total!) * 100) : 0
   const underBudget = variance >= 0
 
   return (
@@ -16,8 +16,8 @@ function VarianceRow({ item }: { item: BOQItem }) {
       <p className="font-medium truncate" style={{ color: '#111111' }}>{item.description}</p>
       <p style={{ color: '#666666' }}>{item.quantity} {item.unit}</p>
       <p style={{ color: '#666666' }}>{usedQty.toFixed(1)} {item.unit}</p>
-      <p style={{ color: '#666666' }}>{formatCurrency(item.budgeted_total)}</p>
-      <p style={{ color: '#666666' }}>{formatCurrency(item.used_total)}</p>
+      <p style={{ color: '#666666' }}>{formatCurrency(item.budgeted_total ?? 0)}</p>
+      <p style={{ color: '#666666' }}>{formatCurrency(item.used_total ?? 0)}</p>
       <p className="font-semibold" style={{ color: underBudget ? '#00236F' : '#E24B4A' }}>
         {underBudget ? '+' : ''}{formatCurrency(variance)}
       </p>

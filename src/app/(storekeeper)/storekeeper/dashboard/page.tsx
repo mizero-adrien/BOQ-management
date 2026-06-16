@@ -8,10 +8,10 @@ import { useBOQSections } from '@/hooks/useBOQSections'
 import { useMaterialLogs } from '@/hooks/useMaterialLogs'
 import { formatDate, formatCurrency } from '@/lib/utils/index'
 import type { SectionWithItems } from '@/hooks/useBOQSections'
-import type { BOQItem } from '@/types/database'
+import type { BOQItemView } from '@/types/database'
 import { SkeletonStats, SkeletonTable } from '@/components/shared/Skeleton'
 
-function LowStockItem({ item }: { item: BOQItem & { usage: number } }) {
+function LowStockItem({ item }: { item: BOQItemView & { usage: number } }) {
   return (
     <div className="bg-white rounded-xl px-4 py-3.5 mb-2" style={{ border: '1px solid #E24B4A' }}>
       <div className="flex items-center justify-between">
@@ -19,7 +19,7 @@ function LowStockItem({ item }: { item: BOQItem & { usage: number } }) {
         <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: '#FFF5F5', color: '#E24B4A' }}>Low stock</span>
       </div>
       <p className="text-xs mt-1" style={{ color: '#666666' }}>
-        {item.used_total.toFixed(0)} of {item.quantity} {item.unit} used ({item.usage}%)
+        {item.used_quantity.toFixed(0)} of {item.quantity} {item.unit} used ({item.usage}%)
       </p>
     </div>
   )
@@ -28,17 +28,10 @@ function LowStockItem({ item }: { item: BOQItem & { usage: number } }) {
 function getLowStockItems(sections: SectionWithItems[]) {
   return sections.flatMap((s) =>
     s.items
+      .filter((item) => item.quantity > 0 && (item.used_quantity / item.quantity) > 0.8)
       .map((item) => ({
         ...item,
-        usage: item.quantity > 0 ? Math.round((item.used_total / (item.quantity * item.unit_rate) ) * 100) : 0,
-      }))
-      .filter((item) => {
-        const usagePct = item.budgeted_total > 0 ? (item.used_total / item.budgeted_total) : 0
-        return usagePct > 0.8
-      })
-      .map((item) => ({
-        ...item,
-        usage: Math.round(item.budgeted_total > 0 ? (item.used_total / item.budgeted_total) * 100 : 0),
+        usage: Math.round((item.used_quantity / item.quantity) * 100),
       }))
   )
 }

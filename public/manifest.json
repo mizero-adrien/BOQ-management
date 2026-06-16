@@ -1,6 +1,6 @@
 {
-  "name": "Construction Manager",
-  "short_name": "ConstManager",
+  "name": "SiteFlow",
+  "short_name": "SiteFlow",
   "description": "Construction site management for East Africa",
   "start_url": "/dashboard",
   "display": "standalone",
@@ -19,6 +19,18 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }

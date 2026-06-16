@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useBOQSections } from '@/hooks/useBOQSections'
+import { useOwnerBOQSummary } from '@/hooks/useOwnerBOQSummary'
 import { formatDate, formatCurrency } from '@/lib/utils/index'
 import type { Project } from '@/types/database'
 
@@ -26,7 +26,7 @@ export default function OwnerOverviewPage({ params }: { params: Promise<{ projec
   const { projectId } = use(params)
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
-  const { sections } = useBOQSections(project?.id)
+  const { sections } = useOwnerBOQSummary(project?.id)
 
   const totalBudget = sections.reduce((s, sec) => s + sec.total_budgeted, 0)
   const totalUsed = sections.reduce((s, sec) => s + sec.total_used, 0)

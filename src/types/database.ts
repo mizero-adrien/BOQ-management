@@ -84,6 +84,7 @@ export interface DailyReport {
   weather: string | null
   status: ReportStatus
   submitted_at: string | null
+  pm_comment?: string | null
 }
 
 export interface ReportPhoto {
@@ -114,6 +115,22 @@ export interface BOQItem {
   budgeted_total: number
   used_quantity: number
   used_total: number
+  status: BOQItemStatus
+  order_index: number
+  updated_at: string
+}
+
+/** Returned by get_boq_items_for_role — financial fields are null for engineer/foreman/storekeeper/owner */
+export interface BOQItemView {
+  id: string
+  section_id: string
+  description: string
+  unit: string
+  quantity: number
+  unit_rate: number | null
+  budgeted_total: number | null
+  used_quantity: number
+  used_total: number | null
   status: BOQItemStatus
   order_index: number
   updated_at: string

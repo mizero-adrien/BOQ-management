@@ -21,7 +21,13 @@ interface Props {
 
 export default function OverviewTab({ project, onUpdate }: Props) {
   const [recent, setRecent] = useState<RecentReport[]>([])
+  const [confirmArchive, setConfirmArchive] = useState(false)
   const router = useRouter()
+
+  async function handleArchive() {
+    await onUpdate({ status: 'cancelled' })
+    setConfirmArchive(false)
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -43,13 +49,37 @@ export default function OverviewTab({ project, onUpdate }: Props) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <ProjectInfoCard project={project} onUpdate={onUpdate} />
-        <div className="bg-white rounded-xl p-5" style={{ border: '1px solid #EEEEEE' }}>
+        <div className="bg-white rounded-xl p-5 mt-4" style={{ border: '1px solid #EEEEEE' }}>
           <p className="text-sm font-semibold mb-3" style={{ color: '#111111' }}>Progress</p>
           <p style={{ color: '#00236F', fontSize: '40px', fontWeight: 700, lineHeight: 1 }}>{project.overall_progress}%</p>
           <div className="mt-3 mb-2 rounded-full" style={{ height: '8px', backgroundColor: '#EEEEEE' }}>
             <div className="h-full rounded-full" style={{ width: `${project.overall_progress}%`, backgroundColor: '#00236F' }} />
           </div>
           <p className="text-xs" style={{ color: '#666666' }}>{project.reportsThisWeek} reports this week</p>
+        </div>
+
+        <div className="bg-white rounded-xl p-5 mt-4" style={{ border: '1px solid #E24B4A' }}>
+          <p className="text-sm font-semibold mb-1" style={{ color: '#E24B4A' }}>Archive project</p>
+          <p className="text-xs mb-3" style={{ color: '#666666' }}>Sets the project status to cancelled.</p>
+          {!confirmArchive ? (
+            <button type="button" onClick={() => setConfirmArchive(true)}
+              className="px-4 py-2 text-xs rounded-lg font-medium"
+              style={{ border: '1px solid #E24B4A', color: '#E24B4A' }}>
+              Archive project
+            </button>
+          ) : (
+            <div>
+              <p className="text-xs mb-2" style={{ color: '#111111' }}>This will set the status to Cancelled. Continue?</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={handleArchive}
+                  className="px-4 py-2 text-xs rounded-lg font-medium text-white"
+                  style={{ backgroundColor: '#E24B4A' }}>Confirm</button>
+                <button type="button" onClick={() => setConfirmArchive(false)}
+                  className="px-4 py-2 text-xs rounded-lg font-medium"
+                  style={{ border: '1px solid #EEEEEE', color: '#666666' }}>Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
