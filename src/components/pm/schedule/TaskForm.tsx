@@ -5,6 +5,7 @@ import { usePlanZones } from '@/hooks/usePlanZones'
 import { toLocalDateString } from '@/lib/utils/calendar'
 import type { Profile, Project } from '@/types/database'
 import type { CreateTaskParams, TaskWithEngineer } from '@/hooks/usePMTasks'
+import { toast } from '@/lib/toast'
 
 interface TaskFormProps {
   selectedDate: Date
@@ -37,8 +38,6 @@ export default function TaskForm({
   const [dueDate, setDueDate] = useState(() => toLocalDateString(selectedDate))
   const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [formError, setFormError] = useState<string | null>(null)
 
   const { zones } = usePlanZones(projectId || undefined)
 
@@ -55,7 +54,6 @@ export default function TaskForm({
     if (!title.trim() || !assignedTo || !projectId || !dueDate) return
 
     setSubmitting(true)
-    setFormError(null)
 
     const engineer = engineers.find((eng) => eng.id === assignedTo)
     const zone = zones.find((z) => z.id === zoneId)
@@ -76,11 +74,10 @@ export default function TaskForm({
       setProjectId('')
       setZoneId('')
       setDescription('')
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 4000)
+      toast.success('Task created', 'Engineer has been notified')
     } catch (err) {
       console.error('Create task error:', err)
-      setFormError('Failed to create task. Please try again.')
+      toast.error('Could not create task', 'Failed to create task. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -154,16 +151,6 @@ export default function TaskForm({
         >
           {submitting ? 'Creating...' : 'Create task'}
         </button>
-        {success && (
-          <p className="text-center text-sm" style={{ color: '#00236F' }}>
-            Task created and engineer notified
-          </p>
-        )}
-        {formError && (
-          <p className="text-center text-sm" style={{ color: '#E24B4A' }}>
-            {formError}
-          </p>
-        )}
       </form>
     </div>
   )

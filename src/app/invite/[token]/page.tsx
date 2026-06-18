@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { toast } from '@/lib/toast'
 
 interface InvitationData {
   id: string
@@ -131,7 +132,6 @@ export default function InvitePage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [currentUserName, setCurrentUserName] = useState<string>('')
   const [accepting, setAccepting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function init() {
@@ -261,7 +261,6 @@ export default function InvitePage() {
   async function handleAccept() {
     if (!invitation || !currentUserId) return
     setAccepting(true)
-    setError(null)
 
     try {
       const supabase = createClient()
@@ -274,9 +273,8 @@ export default function InvitePage() {
           role: invitation.role,
         })
 
-      // 23505 = unique_violation (already a member) — treat as success
       if (pmError && pmError.code !== '23505') {
-        setError('Could not add you to the project. Please try again.')
+        toast.error('Could not join project', 'Could not add you to the project. Please try again.')
         setAccepting(false)
         return
       }
@@ -307,7 +305,7 @@ export default function InvitePage() {
       }, 2000)
     } catch (err) {
       console.error('Accept error:', err)
-      setError('Something went wrong. Please try again.')
+      toast.error('Something went wrong', 'Please try again.')
       setAccepting(false)
     }
   }
@@ -474,11 +472,6 @@ export default function InvitePage() {
       <div style={containerStyle}>
         <div style={cardStyle}>
           <InvitationHeader />
-          {error && (
-            <div style={{ backgroundColor: '#FFF5F5', border: '1px solid #E24B4A', borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '13px', color: '#E24B4A' }}>
-              {error}
-            </div>
-          )}
           <div style={{ borderTop: '0.5px solid #EEEEEE', paddingTop: '20px' }}>
             <button
               type="button"

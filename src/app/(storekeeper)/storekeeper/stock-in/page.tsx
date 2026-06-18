@@ -1,98 +1,364 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useActiveProject } from '@/hooks/useActiveProject'
-import { useBOQSections } from '@/hooks/useBOQSections'
 import { createClient } from '@/lib/supabase/client'
-import type { BOQItemView } from '@/types/database'
+import { toast } from '@/lib/toast'
+
+interface BOQItemOption {
+  id: string
+  description: string
+  unit: string
+  quantity: number
+  used_quantity: number
+  section_title: string
+}
+
+interface Project {
+  id: string
+  name: string
+  pm_id: string
+}
+
+const fieldStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '12px 14px',
+  fontSize: '14px',
+  borderRadius: '8px',
+  border: '1px solid #EEEEEE',
+  backgroundColor: '#F5F6FA',
+  color: '#111111',
+  outline: 'none',
+  fontFamily: 'inherit',
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '13px',
+  fontWeight: '600',
+  color: '#111111',
+  marginBottom: '6px',
+}
 
 export default function StockInPage() {
-  const router = useRouter()
-  const { project } = useActiveProject()
-  const { sections } = useBOQSections(project?.id)
+  const [project, setProject] = useState<Project | null>(null)
+  const [boqItems, setBOQItems] = useState<BOQItemOption[]>([])
+  const [loadingProject, setLoadingProject] = useState(true)
+  const [loadingItems, setLoadingItems] = useState(false)
 
-  const allItems: BOQItemView[] = sections.flatMap((s) => s.items)
-
-  const [itemId, setItemId] = useState('')
-  const [qty, setQty] = useState('')
-  const [supplier, setSupplier] = useState('')
+  const [selectedItemId, setSelectedItemId] = useState('')
+  const [quantity, setQuantity] = useState('')
+  const [supplierName, setSupplierName] = useState('')
   const [deliveryNote, setDeliveryNote] = useState('')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+
+  const selectedItem = boqItems.find((i) => i.id === selectedItemId)
 
   useEffect(() => {
-    if (allItems.length > 0 && !itemId) setItemId(allItems[0].id)
-  }, [allItems, itemId])
+    async function fetchProjectAndItems() {
+      const supabase = createClient()
 
-  const selectedItem = allItems.find((i) => i.id === itemId)
-  const FIELD = { backgroundColor: '#F5F6FA', border: '1px solid #EEEEEE', color: '#111111' }
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        console.error('[stock-in] no authenticated user')
+        setLoadingProject(false)
+        return
+      }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!project || !selectedItem || !qty) return
-    setSubmitting(true); setError(null)
+      console.log('[stock-in] user id:', user.id)
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setError('Session expired.'); setSubmitting(false); return }
+      // Step 1 — find which projects this user is a member of
+      const { data: memberData, error: memberError } = await supabase
+        .from('project_members')
+        .select('project_id')
+        .eq('user_id', user.id)
+        .limit(10)
 
-    const { data: proj } = await supabase.from('projects').select('pm_id').eq('id', project.id).single()
-    if (proj) {
-      const body = `${qty} ${selectedItem.unit} of ${selectedItem.description} received.` +
-        (supplier ? ` Supplier: ${supplier}.` : '') +
-        (deliveryNote ? ` Delivery note: ${deliveryNote}.` : '') +
-        (notes ? ` Notes: ${notes}.` : '')
+      console.log('[stock-in] memberships:', memberData, 'error:', memberError)
+
+      if (memberError || !memberData || memberData.length === 0) {
+        console.error('[stock-in] no project memberships found')
+        setLoadingProject(false)
+        return
+      }
+
+      const projectIds = memberData.map((m: { project_id: string }) => m.project_id)
+
+      // Step 2 — find the active project from those memberships
+      const { data: projectData, error: projectError } = await supabase
+        .from('projects')
+        .select('id, name, pm_id')
+        .in('id', projectIds)
+        .eq('status', 'active')
+        .limit(1)
+        .single()
+
+      console.log('[stock-in] project:', projectData, 'error:', projectError)
+
+      if (projectError || !projectData) {
+        console.error('[stock-in] no active project found')
+        setLoadingProject(false)
+        return
+      }
+
+      setProject(projectData as Project)
+      setLoadingProject(false)
+      setLoadingItems(true)
+
+      // Step 3 — fetch BOQ sections for the project
+      const { data: sectionsData, error: sectionsError } = await supabase
+        .from('boq_sections')
+        .select('id, title')
+        .eq('project_id', projectData.id)
+        .order('order_index', { ascending: true })
+
+      console.log('[stock-in] sections:', sectionsData, 'error:', sectionsError)
+
+      if (sectionsError || !sectionsData || sectionsData.length === 0) {
+        console.error('[stock-in] no BOQ sections found')
+        setLoadingItems(false)
+        return
+      }
+
+      const sectionIds = sectionsData.map((s: { id: string }) => s.id)
+      const sectionMap = Object.fromEntries(
+        sectionsData.map((s: { id: string; title: string }) => [s.id, s.title])
+      )
+
+      // Step 4 — fetch BOQ items within those sections
+      const { data: itemsData, error: itemsError } = await supabase
+        .from('boq_items')
+        .select('id, description, unit, quantity, used_quantity, section_id')
+        .in('section_id', sectionIds)
+        .order('description', { ascending: true })
+
+      console.log('[stock-in] items:', itemsData, 'error:', itemsError)
+
+      if (itemsError || !itemsData) {
+        console.error('[stock-in] items error:', itemsError?.message)
+        setLoadingItems(false)
+        return
+      }
+
+      const items: BOQItemOption[] = itemsData.map((item: {
+        id: string
+        description: string
+        unit: string
+        quantity: number
+        used_quantity: number
+        section_id: string
+      }) => ({
+        id: item.id,
+        description: item.description,
+        unit: item.unit,
+        quantity: item.quantity,
+        used_quantity: item.used_quantity,
+        section_title: sectionMap[item.section_id] ?? 'Unknown section',
+      }))
+
+      console.log('[stock-in] built', items.length, 'items')
+      setBOQItems(items)
+      setLoadingItems(false)
+    }
+
+    fetchProjectAndItems()
+  }, [])
+
+  async function handleSubmit() {
+    if (!selectedItemId) { toast.error('No item selected', 'Please select a BOQ item'); return }
+    if (!quantity || Number(quantity) <= 0) { toast.error('Invalid quantity', 'Please enter a valid quantity'); return }
+    if (!project) { toast.error('No project', 'No active project found'); return }
+
+    setSubmitting(true)
+
+    try {
+      const supabase = createClient()
+
+      const bodyParts = [
+        `${quantity} ${selectedItem?.unit ?? ''} of ${selectedItem?.description ?? ''} received.`,
+        supplierName ? `Supplier: ${supplierName}.` : '',
+        deliveryNote ? `Delivery note: ${deliveryNote}.` : '',
+        notes ? notes : '',
+      ].filter(Boolean).join(' ')
 
       await supabase.from('notifications').insert({
-        user_id: proj.pm_id as string,
+        user_id: project.pm_id,
         project_id: project.id,
         type: 'comment_added',
         title: 'Stock received at site store',
-        body,
+        body: bodyParts,
         read: false,
-        action_url: '/pm/dashboard',
       })
-    }
 
-    router.push('/storekeeper/dashboard')
+      toast.success('Stock recorded', 'The project manager has been notified.')
+      setSelectedItemId('')
+      setQuantity('')
+      setSupplierName('')
+      setDeliveryNote('')
+      setNotes('')
+    } catch (err) {
+      console.error('[stock-in] submit error:', err)
+      toast.error('Unexpected error', 'An unexpected error occurred. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loadingProject) {
+    return (
+      <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#00236F', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ fontSize: '14px', color: '#666666' }}>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px 20px' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#FFFFFF', borderRadius: '12px', border: '0.5px solid #EEEEEE', padding: '32px', textAlign: 'center' }}>
+          <p style={{ fontSize: '16px', fontWeight: '600', color: '#111111', marginBottom: '8px' }}>No active project</p>
+          <p style={{ fontSize: '14px', color: '#666666' }}>You are not assigned to any active project. Ask your project manager to add you.</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '560px', margin: '0 auto' }}>
-      <h1 className="text-xl font-semibold mb-1" style={{ color: '#111111' }}>Record Stock In</h1>
-      <p className="text-sm mb-6" style={{ color: '#666666' }}>{project?.name}</p>
-      {error && <div className="mb-4 px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: '#FFF5F5', color: '#E24B4A' }}>{error}</div>}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: '#111111' }}>BOQ Item</label>
-          <select value={itemId} onChange={(e) => setItemId(e.target.value)} required className="w-full px-4 py-3 text-sm rounded-lg outline-none" style={FIELD}>
-            {allItems.map((i) => <option key={i.id} value={i.id}>{i.description}</option>)}
-          </select>
+    <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px 20px' }}>
+      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+
+        <div style={{ marginBottom: '24px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#111111', marginBottom: '4px' }}>Record Stock In</h1>
+          <p style={{ fontSize: '14px', color: '#666666' }}>{project.name}</p>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: '#111111' }}>
-            Quantity received {selectedItem ? `(${selectedItem.unit})` : ''}
-          </label>
-          <input type="number" min="0" step="any" value={qty} onChange={(e) => setQty(e.target.value)} required className="w-full px-4 py-3 text-sm rounded-lg outline-none" style={FIELD} />
+
+        <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '0.5px solid #EEEEEE', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={labelStyle}>
+              BOQ Item <span style={{ color: '#E24B4A' }}>*</span>
+            </label>
+            {loadingItems ? (
+              <div style={{ ...fieldStyle, color: '#BBBBBB' }}>Loading items...</div>
+            ) : boqItems.length === 0 ? (
+              <div style={{ ...fieldStyle, color: '#BBBBBB' }}>No BOQ items found for this project</div>
+            ) : (
+              <select
+                value={selectedItemId}
+                onChange={(e) => setSelectedItemId(e.target.value)}
+                style={fieldStyle}
+                onFocus={(e) => { e.target.style.border = '1.5px solid #00236F' }}
+                onBlur={(e) => { e.target.style.border = '1px solid #EEEEEE' }}
+              >
+                <option value="">Select a BOQ item</option>
+                {boqItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.section_title} — {item.description} ({item.unit})
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {selectedItem && (
+              <div style={{ marginTop: '8px', backgroundColor: '#E4E9FA', borderRadius: '8px', padding: '10px 12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#00236F' }}>
+                  <span>Budgeted: {selectedItem.quantity} {selectedItem.unit}</span>
+                  <span>Used: {selectedItem.used_quantity} {selectedItem.unit}</span>
+                  <span>Remaining: {Math.max(0, selectedItem.quantity - selectedItem.used_quantity)} {selectedItem.unit}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={labelStyle}>
+              Quantity received <span style={{ color: '#E24B4A' }}>*</span>
+              {selectedItem && <span style={{ fontWeight: '400', color: '#BBBBBB' }}> ({selectedItem.unit})</span>}
+            </label>
+            <input
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              placeholder="0"
+              min="0"
+              step="0.001"
+              style={fieldStyle}
+              onFocus={(e) => { e.target.style.border = '1.5px solid #00236F' }}
+              onBlur={(e) => { e.target.style.border = '1px solid #EEEEEE' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={labelStyle}>
+              Supplier name <span style={{ fontSize: '11px', fontWeight: '400', color: '#BBBBBB' }}>optional</span>
+            </label>
+            <input
+              type="text"
+              value={supplierName}
+              onChange={(e) => setSupplierName(e.target.value)}
+              placeholder="e.g. Kigali Cement Ltd"
+              style={fieldStyle}
+              onFocus={(e) => { e.target.style.border = '1.5px solid #00236F' }}
+              onBlur={(e) => { e.target.style.border = '1px solid #EEEEEE' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={labelStyle}>
+              Delivery note number <span style={{ fontSize: '11px', fontWeight: '400', color: '#BBBBBB' }}>optional</span>
+            </label>
+            <input
+              type="text"
+              value={deliveryNote}
+              onChange={(e) => setDeliveryNote(e.target.value)}
+              placeholder="e.g. DN-2026-001"
+              style={fieldStyle}
+              onFocus={(e) => { e.target.style.border = '1.5px solid #00236F' }}
+              onBlur={(e) => { e.target.style.border = '1px solid #EEEEEE' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <label style={labelStyle}>
+              Notes <span style={{ fontSize: '11px', fontWeight: '400', color: '#BBBBBB' }}>optional</span>
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any notes about this delivery"
+              rows={3}
+              style={{ ...fieldStyle, resize: 'vertical', lineHeight: '1.5' }}
+              onFocus={(e) => { e.target.style.border = '1.5px solid #00236F' }}
+              onBlur={(e) => { e.target.style.border = '1px solid #EEEEEE' }}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitting}
+            style={{
+              width: '100%',
+              padding: '14px',
+              backgroundColor: submitting ? '#BBBBBB' : '#00236F',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: submitting ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {submitting ? 'Recording...' : 'Record receipt'}
+          </button>
+
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: '#111111' }}>Supplier name (optional)</label>
-          <input type="text" value={supplier} onChange={(e) => setSupplier(e.target.value)} className="w-full px-4 py-3 text-sm rounded-lg outline-none" style={FIELD} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: '#111111' }}>Delivery note number (optional)</label>
-          <input type="text" value={deliveryNote} onChange={(e) => setDeliveryNote(e.target.value)} className="w-full px-4 py-3 text-sm rounded-lg outline-none" style={FIELD} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: '#111111' }}>Notes (optional)</label>
-          <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 text-sm rounded-lg outline-none resize-none" style={FIELD} />
-        </div>
-        <button type="submit" disabled={submitting || !project} className="w-full py-4 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: '#00236F' }}>
-          {submitting ? 'Recording...' : 'Record receipt'}
-        </button>
-      </form>
+      </div>
     </div>
   )
 }

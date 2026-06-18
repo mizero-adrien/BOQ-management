@@ -44,24 +44,22 @@ export function usePMEngineers(projects: Project[]) {
           ...new Set((members ?? []).map((m) => m.user_id as string)),
         ]
 
-        if (userIds.length === 0) {
+        if (userIds.length > 0) {
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', userIds)
+            .order('full_name', { ascending: true })
+
+          if (profilesError) {
+            console.error('PM engineers error: profiles fetch failed:', profilesError.message)
+          }
+
+          if (!cancelled) {
+            setEngineers(profiles ?? [])
+          }
+        } else {
           if (!cancelled) setEngineers([])
-          return
-        }
-
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .in('id', userIds)
-          .order('full_name', { ascending: true })
-
-        if (profilesError) {
-          console.error('PM engineers error: profiles fetch failed:', profilesError.message)
-          return
-        }
-
-        if (!cancelled) {
-          setEngineers(profiles ?? [])
         }
       } catch (err) {
         console.error('PM engineers error: unexpected error:', err)

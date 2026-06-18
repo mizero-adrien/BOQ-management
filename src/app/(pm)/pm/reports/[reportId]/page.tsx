@@ -1,10 +1,13 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useReportDetail } from '@/hooks/useReportDetail'
 import { formatDate, formatTime } from '@/lib/utils'
 import PhotoGrid from '@/components/pm/reports/PhotoGrid'
+import { toast } from '@/lib/toast'
 
 const STATUS_COLOR: Record<string, { bg: string; text: string }> = {
   submitted:  { bg: '#E4E9FA', text: '#00236F' },
@@ -32,16 +35,14 @@ export default function ReportDetailPage() {
   const { report, tasks, loading, saveComment } = useReportDetail(reportId)
   const [comment, setComment] = useState('')
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
 
   async function handleSave() {
     if (!comment.trim() || saving) return
     setSaving(true)
     await saveComment(comment)
     setSaving(false)
-    setSaved(true)
     setComment('')
-    setTimeout(() => setSaved(false), 3000)
+    toast.success('Comment saved', 'Engineer has been notified')
   }
 
   if (loading) {
@@ -143,11 +144,6 @@ export default function ReportDetailPage() {
       <div className="bg-white rounded-xl p-5 mb-4" style={{ border: '1px solid #EEEEEE' }}>
         <p className="text-sm font-semibold mb-1" style={{ color: '#111111' }}>PM Comment</p>
         <p className="text-xs mb-3" style={{ color: '#666666' }}>Engineer will receive a notification when you save.</p>
-        {saved && (
-          <div className="rounded-lg px-3 py-2 mb-3 text-sm" style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}>
-            Comment saved and engineer notified.
-          </div>
-        )}
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}

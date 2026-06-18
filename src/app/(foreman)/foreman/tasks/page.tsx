@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useProjectTasks } from '@/hooks/useProjectTasks'
 import { formatDate } from '@/lib/utils/index'

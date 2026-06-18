@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import ToastContainer from '@/components/shared/ToastContainer'
 
 export const metadata: Metadata = {
   title: 'Set up your account — BOQ Management',
@@ -28,6 +29,7 @@ export default function OnboardingLayout({
         </div>
         {children}
       </div>
+      <ToastContainer />
     </div>
   )
 }

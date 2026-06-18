@@ -14,6 +14,7 @@ const navItems = [
   { label: 'Projects', href: '/pm/projects', icon: ProjectsIcon },
   { label: 'Team', href: '/pm/team', icon: TeamIcon },
   { label: 'BOQ', href: '/pm/boq', icon: BOQIcon },
+  { label: 'Procurement', href: '/procurement/dashboard', icon: ProcurementIcon },
   { label: 'Profile', href: '/pm/profile', icon: ProfileIcon },
   { label: 'Notifications', href: '/pm/notifications', icon: BellNavIcon },
   { label: 'Settings', href: '/pm/settings', icon: SettingsIcon },
@@ -203,6 +204,16 @@ function BellNavIcon({ active }: { active: boolean }) {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  )
+}
+
+function ProcurementIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
     </svg>
   )
 }

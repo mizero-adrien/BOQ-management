@@ -1,5 +1,3 @@
-import type { NextConfig } from 'next'
-
 const withPWA = require('next-pwa')({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
@@ -7,16 +5,17 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
 })
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   turbopack: {},
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.supabase.co',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
       },
     ],
   },
 }
 
-export default withPWA(nextConfig)
+module.exports = withPWA(nextConfig)

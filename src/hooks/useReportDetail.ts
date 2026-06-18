@@ -97,7 +97,7 @@ export function useReportDetail(reportId: string) {
       title: 'PM commented on your report',
       body: comment.slice(0, 100),
       read: false,
-      action_url: `/pm/reports/${reportId}`,
+      action_url: `/report/${reportId}`,
     })
   }
 

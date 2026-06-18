@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+export const dynamic = 'force-dynamic'
+
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useProfile } from '@/hooks/useProfile'
@@ -8,6 +10,7 @@ import { useTodayReport } from '@/hooks/useTodayReport'
 import { usePlanZones } from '@/hooks/usePlanZones'
 import { useSubmitReport } from '@/hooks/useSubmitReport'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from '@/lib/toast'
 import AlreadySubmitted from '@/components/report/AlreadySubmitted'
 import StepIndicator from '@/components/report/StepIndicator'
 import ZoneProgressStep from '@/components/report/ZoneProgressStep'
@@ -49,6 +52,11 @@ export default function NewReportPage() {
 
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<ReportFormState>(initialForm)
+  const [savingDraft, setSavingDraft] = useState(false)
+
+  useEffect(() => {
+    if (error) toast.error('Failed to submit report', error)
+  }, [error])
 
   function update<K extends keyof ReportFormState>(k: K, v: ReportFormState[K]) {
     setForm((p) => ({ ...p, [k]: v }))
@@ -65,6 +73,36 @@ export default function NewReportPage() {
   function go(next: number) { setStep(next) }
 
   const zoneName = zones.find((z) => z.id === form.zoneId)?.name ?? form.zoneName
+
+  async function handleSaveDraft() {
+    if (!project || !profile) return
+    setSavingDraft(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const todayStr = new Date().toISOString().slice(0, 10)
+      await supabase.from('daily_reports').upsert(
+        {
+          project_id: project.id,
+          engineer_id: user.id,
+          report_date: todayStr,
+          workers_count: form.workersCount,
+          progress_pct: form.progressPct,
+          weather: form.weather,
+          notes: form.notes || null,
+          issues: form.issues || null,
+          zone_id: form.zoneId || null,
+          status: 'draft',
+        },
+        { onConflict: 'project_id,engineer_id,report_date' }
+      )
+    } catch (err) {
+      console.error('[report] draft save error:', err)
+    } finally {
+      setSavingDraft(false)
+      router.push('/dashboard')
+    }
+  }
 
   async function handleSubmit() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -93,17 +131,15 @@ export default function NewReportPage() {
           </svg>
         </button>
         <h1 className="flex-1 text-center text-base font-semibold -ml-8" style={{ color: '#111111' }}>Submit Report</h1>
-        {step === 4 && <button type="button" onClick={() => router.push('/dashboard')} className="text-sm" style={{ color: '#666666' }}>Save draft</button>}
+        {step === 4 && (
+          <button type="button" onClick={handleSaveDraft} disabled={savingDraft} className="text-sm" style={{ color: '#666666' }}>
+            {savingDraft ? 'Saving...' : 'Save draft'}
+          </button>
+        )}
         {step < 4 && <div className="w-8" />}
       </div>
 
       <StepIndicator currentStep={step} />
-
-      {error && (
-        <div className="mx-4 mt-4 px-4 py-3 rounded-lg border text-sm" style={{ borderColor: '#E24B4A', backgroundColor: '#FFF5F5', color: '#E24B4A' }}>
-          {error}
-        </div>
-      )}
 
       {step === 1 && <ZoneProgressStep zones={zones} zoneId={form.zoneId} zoneName={form.zoneName} progressPct={form.progressPct} onZoneIdChange={(v) => update('zoneId', v)} onZoneNameChange={(v) => update('zoneName', v)} onProgressChange={(v) => update('progressPct', v)} />}
       {step === 2 && <WorkersWeatherStep workersCount={form.workersCount} weather={form.weather} onWorkersChange={(v) => update('workersCount', v)} onWeatherChange={(v) => update('weather', v)} />}

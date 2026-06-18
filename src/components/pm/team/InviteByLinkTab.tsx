@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import InviteSuccessPanel from './InviteSuccessPanel'
 import type { Project } from '@/types/database'
+import { toast } from '@/lib/toast'
+import { formatRole } from '@/lib/utils/roleLabels'
 
 interface Props {
   projects: Project[]
@@ -17,18 +19,6 @@ interface SuccessResult {
   projectName: string
   inviteeEmail: string
   role: string
-}
-
-function formatRole(role: string): string {
-  const map: Record<string, string> = {
-    engineer: 'Site Engineer',
-    pm: 'Project Manager',
-    foreman: 'Foreman',
-    qs: 'Quantity Surveyor',
-    storekeeper: 'Storekeeper',
-    owner: 'Owner / Client',
-  }
-  return map[role] ?? role
 }
 
 const fieldStyle: React.CSSProperties = {
@@ -47,17 +37,14 @@ export default function InviteByLinkTab({ projects, currentUserId, currentUserNa
   const [role, setRole] = useState('engineer')
   const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id ?? '')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<SuccessResult | null>(null)
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId) ?? projects[0]
 
   async function handleCreate() {
-    setError(null)
-
-    if (!email.trim()) { setError('Please enter an email address'); return }
-    if (!email.includes('@')) { setError('Please enter a valid email address'); return }
-    if (!selectedProjectId) { setError('Please select a project'); return }
+    if (!email.trim()) { toast.error('Missing email', 'Please enter an email address'); return }
+    if (!email.includes('@')) { toast.error('Invalid email', 'Please enter a valid email address'); return }
+    if (!selectedProjectId) { toast.error('No project selected', 'Please select a project'); return }
 
     setLoading(true)
 
@@ -71,7 +58,7 @@ export default function InviteByLinkTab({ projects, currentUserId, currentUserNa
         .single()
 
       if (cmError || !companyMember) {
-        setError('Could not find your company. Please refresh and try again.')
+        toast.error('Company not found', 'Could not find your company. Please refresh and try again.')
         setLoading(false)
         return
       }
@@ -89,7 +76,7 @@ export default function InviteByLinkTab({ projects, currentUserId, currentUserNa
         .single()
 
       if (inviteError || !invitation) {
-        setError('Could not create invitation: ' + (inviteError?.message ?? 'Unknown error'))
+        toast.error('Could not create invitation', inviteError?.message ?? 'Unknown error')
         setLoading(false)
         return
       }
@@ -118,7 +105,7 @@ export default function InviteByLinkTab({ projects, currentUserId, currentUserNa
       setEmail('')
     } catch (err) {
       console.error('Unexpected error:', err)
-      setError('An unexpected error occurred. Please try again.')
+      toast.error('Unexpected error', 'An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -139,12 +126,6 @@ export default function InviteByLinkTab({ projects, currentUserId, currentUserNa
 
   return (
     <div style={{ maxWidth: '480px' }}>
-      {error && (
-        <div style={{ backgroundColor: '#FFF5F5', border: '1px solid #E24B4A', borderRadius: '8px', padding: '12px 14px', marginBottom: '16px', fontSize: '13px', color: '#E24B4A' }}>
-          {error}
-        </div>
-      )}
-
       {/* Project selector — always first, always required */}
       <div style={{ marginBottom: '14px' }}>
         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#111111', marginBottom: '6px' }}>
@@ -198,6 +179,7 @@ export default function InviteByLinkTab({ projects, currentUserId, currentUserNa
           <option value="foreman">Foreman</option>
           <option value="qs">Quantity Surveyor</option>
           <option value="storekeeper">Storekeeper</option>
+          <option value="procurement">Procurement Officer</option>
           <option value="owner">Owner / Client</option>
         </select>
       </div>

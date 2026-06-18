@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonTable } from '@/components/shared/Skeleton'
 import type { Project } from '@/types/database'
+import { formatRole } from '@/lib/utils/roleLabels'
 
 interface Member {
   id: string
@@ -51,14 +52,6 @@ export default function TeamMembersList({ projects, loading }: Props) {
     }
     fetchMembers()
   }, [selectedProjectId])
-
-  function formatRole(role: string) {
-    const map: Record<string, string> = {
-      engineer: 'Site Engineer', pm: 'Project Manager', foreman: 'Foreman',
-      qs: 'Quantity Surveyor', storekeeper: 'Storekeeper', owner: 'Owner',
-    }
-    return map[role] ?? role
-  }
 
   if (loading || membersLoading) return <SkeletonTable rows={4} />
 

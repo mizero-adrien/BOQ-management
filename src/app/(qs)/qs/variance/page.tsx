@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useBOQSections } from '@/hooks/useBOQSections'
 import { formatCurrency } from '@/lib/utils/index'

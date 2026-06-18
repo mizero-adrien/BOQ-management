@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatDate } from '@/lib/utils'
 import type { Profile } from '@/types/database'
+import { toast } from '@/lib/toast'
 
 const ROLE_LABELS: Record<string, string> = {
   engineer: 'Site Engineer', pm: 'Project Manager', foreman: 'Foreman',
@@ -50,6 +51,7 @@ export default function ProfileDetailsCard({
     await supabase.from('profiles').update({ full_name: name.trim() }).eq('id', profile.id)
     await supabase.auth.updateUser({ data: { full_name: name.trim() } })
     onNameUpdated(name.trim())
+    toast.success('Name updated')
     setSaving(false)
     setEditing(false)
   }

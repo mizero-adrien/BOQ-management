@@ -1,9 +1,12 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from '@/lib/toast'
 
 export default function ForemanLogPage() {
   const router = useRouter()
@@ -12,7 +15,6 @@ export default function ForemanLogPage() {
   const [notes, setNotes] = useState('')
   const [issues, setIssues] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const FIELD = { backgroundColor: '#F5F6FA', border: '1px solid #EEEEEE', color: '#111111' }
 
@@ -20,10 +22,9 @@ export default function ForemanLogPage() {
     e.preventDefault()
     if (!project) return
     setSubmitting(true)
-    setError(null)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setError('Session expired.'); setSubmitting(false); return }
+    if (!user) { toast.error('Session expired', 'Please sign in again'); setSubmitting(false); return }
 
     const todayStr = new Date().toISOString().slice(0, 10)
     const { error: err } = await supabase.from('daily_reports').upsert({
@@ -38,7 +39,7 @@ export default function ForemanLogPage() {
       submitted_at: new Date().toISOString(),
     }, { onConflict: 'project_id,engineer_id,report_date' })
 
-    if (err) { setError('Failed to submit. Please try again.'); setSubmitting(false); return }
+    if (err) { toast.error('Failed to submit', 'Please try again'); setSubmitting(false); return }
 
     // Notify PM
     const { data: project_data } = await supabase.from('projects').select('pm_id').eq('id', project.id).single()
@@ -61,7 +62,6 @@ export default function ForemanLogPage() {
     <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '560px', margin: '0 auto' }}>
       <h1 className="text-xl font-semibold mb-1" style={{ color: '#111111' }}>Daily Crew Report</h1>
       <p className="text-sm mb-6" style={{ color: '#666666' }}>{project?.name ?? 'Loading...'}</p>
-      {error && <div className="mb-4 px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: '#FFF5F5', color: '#E24B4A' }}>{error}</div>}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="block text-sm font-medium mb-2" style={{ color: '#111111' }}>Workers present today</label>

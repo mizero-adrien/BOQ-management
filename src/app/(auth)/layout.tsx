@@ -1,3 +1,5 @@
+import ToastContainer from '@/components/shared/ToastContainer'
+
 export default function AuthLayout({
   children,
 }: {
@@ -8,6 +10,7 @@ export default function AuthLayout({
       <div className="w-full max-w-sm">
         {children}
       </div>
+      <ToastContainer />
     </main>
   )
 }

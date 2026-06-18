@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from '@/lib/toast'
 
 const INPUT_STYLE = {
   backgroundColor: '#F5F6FA',
@@ -16,7 +17,6 @@ export default function ProfileSecurityCard() {
   const [confirm, setConfirm] = useState('')
   const [errors, setErrors] = useState<{ next?: string; confirm?: string; submit?: string }>({})
   const [saving, setSaving] = useState(false)
-  const [success, setSuccess] = useState(false)
 
   function validate(): boolean {
     const e: typeof errors = {}
@@ -35,11 +35,12 @@ export default function ProfileSecurityCard() {
     setSaving(false)
     if (error) {
       setErrors({ submit: error.message })
+      toast.error('Update failed', error.message)
       return
     }
-    setSuccess(true)
+    toast.success('Password updated successfully')
     setCurrent(''); setNext(''); setConfirm('')
-    setTimeout(() => { setSuccess(false); setExpanded(false) }, 3000)
+    setExpanded(false)
   }
 
   return (
@@ -63,11 +64,6 @@ export default function ProfileSecurityCard() {
 
         {expanded && (
           <div className="px-4 pb-4 border-t" style={{ borderColor: '#EEEEEE' }}>
-            {success && (
-              <p className="text-xs mt-3 mb-3 font-medium" style={{ color: '#00236F' }}>
-                Password updated successfully
-              </p>
-            )}
             <div className="flex flex-col gap-2 mt-3">
               <input
                 type="password"

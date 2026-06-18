@@ -19,35 +19,44 @@ export function useTeamMembers(projectId: string) {
     setLoading(true)
     const supabase = createClient()
 
-    const { data: pm } = await supabase
+    const { data: pm, error: pmError } = await supabase
       .from('project_members')
       .select('user_id, role')
       .eq('project_id', projectId)
 
-    if (!pm || pm.length === 0) {
-      setMembers([])
-      setLoading(false)
-      return
+    if (pmError) {
+      console.error('[useTeamMembers] project_members fetch error:', pmError.message)
     }
 
-    const userIds = pm.map((m) => m.user_id as string)
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .in('id', userIds)
+    const memberRows = pm ?? []
 
-    const nameMap = new Map(
-      (profiles ?? []).map((p) => [p.id as string, p.full_name as string])
-    )
+    if (memberRows.length > 0) {
+      const userIds = memberRows.map((m) => m.user_id as string)
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds)
 
-    setMembers(
-      pm.map((m) => ({
-        userId: m.user_id as string,
-        fullName: nameMap.get(m.user_id as string) ?? 'Unknown',
-        role: m.role as string,
-        projectId,
-      }))
-    )
+      if (profilesError) {
+        console.error('[useTeamMembers] profiles fetch error:', profilesError.message)
+      }
+
+      const nameMap = new Map(
+        (profiles ?? []).map((p) => [p.id as string, p.full_name as string])
+      )
+
+      setMembers(
+        memberRows.map((m) => ({
+          userId: m.user_id as string,
+          fullName: nameMap.get(m.user_id as string) ?? 'Unknown',
+          role: m.role as string,
+          projectId,
+        }))
+      )
+    } else {
+      setMembers([])
+    }
+
     setLoading(false)
   }, [projectId])
 

@@ -1,9 +1,12 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from '@/lib/toast'
 
 export default function NewProjectPage() {
   const router = useRouter()
@@ -14,7 +17,6 @@ export default function NewProjectPage() {
   const [endDate, setEndDate] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const fieldStyle = {
     width: '100%',
@@ -37,13 +39,11 @@ export default function NewProjectPage() {
   }
 
   async function handleSubmit() {
-    setError(null)
-
-    if (!name.trim()) { setError('Project name is required'); return }
-    if (!location.trim()) { setError('Location is required'); return }
-    if (!clientName.trim()) { setError('Client name is required'); return }
-    if (!startDate) { setError('Start date is required'); return }
-    if (!endDate) { setError('Expected end date is required'); return }
+    if (!name.trim()) { toast.error('Missing field', 'Project name is required'); return }
+    if (!location.trim()) { toast.error('Missing field', 'Location is required'); return }
+    if (!clientName.trim()) { toast.error('Missing field', 'Client name is required'); return }
+    if (!startDate) { toast.error('Missing field', 'Start date is required'); return }
+    if (!endDate) { toast.error('Missing field', 'Expected end date is required'); return }
 
     setLoading(true)
 
@@ -52,7 +52,7 @@ export default function NewProjectPage() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        setError('You must be logged in')
+        toast.error('Not authenticated', 'You must be logged in')
         setLoading(false)
         return
       }
@@ -64,7 +64,7 @@ export default function NewProjectPage() {
 
       if (cmError || !companyMembers || companyMembers.length === 0) {
         console.error('Company member query:', cmError ?? 'No company members found for user ' + user.id)
-        setError('Could not find your company. Please refresh the page and try again.')
+        toast.error('Company not found', 'Could not find your company. Please refresh the page and try again.')
         setLoading(false)
         return
       }
@@ -89,7 +89,7 @@ export default function NewProjectPage() {
 
       if (projectError || !project) {
         console.error('Project error:', projectError?.message)
-        setError('Could not create project: ' + (projectError?.message ?? 'Unknown error'))
+        toast.error('Could not create project', projectError?.message ?? 'Unknown error')
         setLoading(false)
         return
       }
@@ -100,10 +100,11 @@ export default function NewProjectPage() {
         role: 'pm',
       })
 
+      toast.success('Project created', name.trim())
       router.push('/pm/projects/' + project.id)
     } catch (err) {
       console.error('Unexpected error:', err)
-      setError('An unexpected error occurred. Please try again.')
+      toast.error('Unexpected error', 'An unexpected error occurred. Please try again.')
       setLoading(false)
     }
   }
@@ -126,12 +127,6 @@ export default function NewProjectPage() {
         </div>
 
         <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '0.5px solid #EEEEEE', padding: '28px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          {error && (
-            <div style={{ backgroundColor: '#FFF5F5', border: '1px solid #E24B4A', borderRadius: '8px', padding: '12px 14px', marginBottom: '20px', fontSize: '13px', color: '#E24B4A' }}>
-              {error}
-            </div>
-          )}
-
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>Project name <span style={{ color: '#E24B4A' }}>*</span></label>
             <input

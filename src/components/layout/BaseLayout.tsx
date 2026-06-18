@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useProfile } from '@/hooks/useProfile'
 import { useSignOut } from '@/hooks/useSignOut'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
+import { formatRole } from '@/lib/utils/roleLabels'
+import MobileTopBar from '@/components/layout/MobileTopBar'
 
 export interface NavItem {
   label: string
@@ -16,11 +18,7 @@ export interface NavItem {
 interface BaseLayoutProps {
   children: React.ReactNode
   navItems: NavItem[]
-}
-
-const ROLE_LABEL: Record<string, string> = {
-  engineer: 'Site Engineer', pm: 'Project Manager', foreman: 'Foreman',
-  qs: 'Quantity Surveyor', storekeeper: 'Storekeeper', owner: 'Owner',
+  backButton?: boolean
 }
 
 function navIsActive(pathname: string, href: string): boolean {
@@ -41,8 +39,9 @@ function LogoIcon() {
   )
 }
 
-function BaseSidebar({ navItems }: { navItems: NavItem[] }) {
+function BaseSidebar({ navItems, backButton }: { navItems: NavItem[]; backButton?: boolean }) {
   const pathname = usePathname()
+  const router = useRouter()
   const { profile } = useProfile()
   const { signOut } = useSignOut()
   const { unreadCount } = useNotifications()
@@ -62,6 +61,23 @@ function BaseSidebar({ navItems }: { navItems: NavItem[] }) {
         <NotificationBell unreadCount={unreadCount} />
       </div>
       <div className="border-b" style={{ borderColor: '#EEEEEE' }} />
+
+      {backButton && (
+        <div className="px-3 pt-3 pb-1">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium"
+            style={{ color: '#666666', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back
+          </button>
+        </div>
+      )}
+
       <nav className="flex-1 py-3 space-y-0.5">
         {navItems.map((item) => {
           const active = navIsActive(pathname, item.href)
@@ -84,7 +100,7 @@ function BaseSidebar({ navItems }: { navItems: NavItem[] }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium truncate" style={{ color: '#111111' }}>{profile?.full_name ?? 'Loading...'}</p>
-              <p className="text-xs mt-0.5" style={{ color: '#666666' }}>{profile?.role ? (ROLE_LABEL[profile.role] ?? profile.role) : ''}</p>
+              <p className="text-xs mt-0.5" style={{ color: '#666666' }}>{profile?.role ? formatRole(profile.role) : ''}</p>
             </div>
           </div>
           <button type="button" onClick={signOut} className="mt-3 w-full text-left text-xs font-medium" style={{ color: '#666666' }}>
@@ -118,13 +134,11 @@ function BaseBottomNav({ navItems }: { navItems: NavItem[] }) {
   )
 }
 
-import MobileTopBar from '@/components/layout/MobileTopBar'
-
-export default function BaseLayout({ children, navItems }: BaseLayoutProps) {
+export default function BaseLayout({ children, navItems, backButton }: BaseLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F5F6FA' }}>
-      <MobileTopBar />
-      <BaseSidebar navItems={navItems} />
+      <MobileTopBar backButton={backButton} />
+      <BaseSidebar navItems={navItems} backButton={backButton} />
       <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">{children}</main>
       <BaseBottomNav navItems={navItems} />
     </div>

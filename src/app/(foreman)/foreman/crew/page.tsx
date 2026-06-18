@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useProjectMembers } from '@/hooks/useProjectMembers'

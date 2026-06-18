@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useMemo } from 'react'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useMaterialLogs } from '@/hooks/useMaterialLogs'

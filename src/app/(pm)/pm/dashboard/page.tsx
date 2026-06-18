@@ -18,6 +18,7 @@ import NotificationBell from '@/components/shared/NotificationBell'
 import MobileProfileCard from '@/components/pm/MobileProfileCard'
 import { EmptyCard, SearchIcon, InfoIcon, XSmallIcon } from '@/components/shared/DashboardUtils'
 import { SkeletonStats, SkeletonCard, SkeletonTable } from '@/components/shared/Skeleton'
+import ProcurementWidget from '@/components/pm/ProcurementWidget'
 
 export default function PMDashboardPage() {
   const { projects, loading: projectsLoading } = usePMProjects()
@@ -117,6 +118,8 @@ export default function PMDashboardPage() {
           <StatCard label="Open issues" value={String(stats.openIssues)} alert={stats.openIssues > 0} />
         </div>
       )}
+
+      <ProcurementWidget />
 
       {/* Projects */}
       <div className="mb-8">

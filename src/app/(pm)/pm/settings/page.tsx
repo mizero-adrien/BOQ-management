@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Company } from '@/types/database'
+import { toast } from '@/lib/toast'
 
 type RawMember = { company: Company }
 
@@ -14,7 +15,7 @@ export default function SettingsPage() {
   const [country, setCountry] = useState('')
   const [currency, setCurrency] = useState('')
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [loadingSettings, setLoadingSettings] = useState(true)
   const [showDanger, setShowDanger] = useState(false)
   const [dangerInput, setDangerInput] = useState('')
 
@@ -22,7 +23,7 @@ export default function SettingsPage() {
     async function load() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) { setLoadingSettings(false); return }
       const { data } = await supabase
         .from('company_members')
         .select('company:companies(*)')
@@ -35,6 +36,7 @@ export default function SettingsPage() {
         setCountry(c.country ?? '')
         setCurrency(c.currency ?? '')
       }
+      setLoadingSettings(false)
     }
     load()
   }, [])
@@ -45,8 +47,7 @@ export default function SettingsPage() {
     const supabase = createClient()
     await supabase.from('companies').update({ name, country, currency }).eq('id', company.id)
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    toast.success('Saved', 'Company profile updated')
   }
 
   const fields: [string, string, (v: string) => void][] = [
@@ -54,6 +55,40 @@ export default function SettingsPage() {
     ['Country', country, setCountry],
     ['Currency code', currency, setCurrency],
   ]
+
+  if (loadingSettings) {
+    return (
+      <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto' }} className="space-y-3">
+          <div className="h-6 w-40 rounded-lg animate-pulse" style={{ backgroundColor: '#EEEEEE' }} />
+          <div className="h-4 w-56 rounded-lg animate-pulse" style={{ backgroundColor: '#EEEEEE' }} />
+          <div className="bg-white rounded-xl p-5 mt-4 animate-pulse" style={{ border: '1px solid #EEEEEE', height: '220px' }} />
+        </div>
+      </div>
+    )
+  }
+
+  if (!company) {
+    return (
+      <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#111111', marginBottom: '4px' }}>Settings</h1>
+          <p style={{ fontSize: '14px', color: '#666666', marginBottom: '24px' }}>Company account settings</p>
+          <div className="bg-white rounded-xl p-8 text-center" style={{ border: '1px solid #EEEEEE' }}>
+            <p className="text-sm font-semibold mb-2" style={{ color: '#111111' }}>No company found</p>
+            <p className="text-sm mb-4" style={{ color: '#666666' }}>
+              Your account is not linked to a company. Complete onboarding to set up your company.
+            </p>
+            <a href="/onboarding"
+              className="inline-block px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+              style={{ backgroundColor: '#00236F' }}>
+              Go to onboarding
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px' }}>
@@ -74,7 +109,7 @@ export default function SettingsPage() {
           <button type="button" onClick={handleSave} disabled={saving || !company}
             className="mt-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ backgroundColor: '#00236F', opacity: saving ? 0.6 : 1 }}>
-            {saved ? 'Saved' : saving ? 'Saving...' : 'Save changes'}
+            {saving ? 'Saving...' : 'Save changes'}
           </button>
         </div>
 

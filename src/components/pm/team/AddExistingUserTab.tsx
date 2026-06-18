@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Project } from '@/types/database'
+import { toast } from '@/lib/toast'
 
 interface SearchResult {
   id: string
@@ -24,8 +25,6 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
   const [selectedRole, setSelectedRole] = useState('engineer')
   const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id ?? '')
   const [adding, setAdding] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
 
   async function handleSearch(term: string) {
     setSearchTerm(term)
@@ -47,8 +46,6 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
   async function handleAdd() {
     if (!selectedUser || !selectedProjectId) return
     setAdding(true)
-    setError(null)
-    setSuccess(null)
     try {
       const supabase = createClient()
       const { data: companyMember } = await supabase
@@ -57,15 +54,15 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
         .eq('user_id', currentUserId)
         .single()
 
-      if (!companyMember) { setError('Could not find company'); setAdding(false); return }
+      if (!companyMember) { toast.error('Company not found'); setAdding(false); return }
 
       const { error: pmError } = await supabase
         .from('project_members')
         .insert({ project_id: selectedProjectId, user_id: selectedUser.id, role: selectedRole })
 
       if (pmError) {
-        if (pmError.code === '23505') { setError('This person is already on this project') }
-        else { setError('Could not add member: ' + pmError.message) }
+        if (pmError.code === '23505') { toast.warning('Already a member', 'This person is already on this project') }
+        else { toast.error('Could not add member', pmError.message) }
         setAdding(false)
         return
       }
@@ -86,13 +83,13 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
         read: false,
       })
 
-      setSuccess(selectedUser.full_name + ' has been added to the project')
+      toast.success('Team member added', selectedUser.full_name + ' has joined the project')
       setSelectedUser(null)
       setSearchTerm('')
       setResults([])
     } catch (err) {
       console.error('Add member error:', err)
-      setError('An unexpected error occurred')
+      toast.error('Unexpected error', 'An unexpected error occurred')
     } finally {
       setAdding(false)
     }
@@ -100,18 +97,6 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
 
   return (
     <div style={{ maxWidth: '480px' }}>
-      {error && (
-        <div style={{ backgroundColor: '#FFF5F5', border: '1px solid #E24B4A', borderRadius: '8px', padding: '12px', marginBottom: '14px', fontSize: '13px', color: '#E24B4A' }}>
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div style={{ backgroundColor: '#E4E9FA', border: '1px solid #C8D4F8', borderRadius: '8px', padding: '12px', marginBottom: '14px', fontSize: '13px', color: '#00236F' }}>
-          {success}
-        </div>
-      )}
-
       <div style={{ marginBottom: '14px' }}>
         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#111111', marginBottom: '6px' }}>
           Search by name

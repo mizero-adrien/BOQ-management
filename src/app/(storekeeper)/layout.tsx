@@ -2,6 +2,8 @@
 
 import BaseLayout, { type NavItem } from '@/components/layout/BaseLayout'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import PageErrorBoundary from '@/components/shared/PageErrorBoundary'
+import ToastContainer from '@/components/shared/ToastContainer'
 
 const C = '#00236F'
 const G = '#BBBBBB'
@@ -26,8 +28,11 @@ const navItems: NavItem[] = [
 
 export default function StorekeeperLayout({ children }: { children: React.ReactNode }) {
   return (
-    <NotificationProvider>
-      <BaseLayout navItems={navItems}>{children}</BaseLayout>
-    </NotificationProvider>
+    <PageErrorBoundary>
+      <NotificationProvider>
+        <BaseLayout navItems={navItems}>{children}</BaseLayout>
+        <ToastContainer />
+      </NotificationProvider>
+    </PageErrorBoundary>
   )
 }

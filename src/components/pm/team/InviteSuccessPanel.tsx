@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from '@/lib/toast'
 
 interface Props {
   inviteLink: string
@@ -30,12 +31,14 @@ export default function InviteSuccessPanel({ inviteLink, message, projectName, i
   async function copyLink() {
     await navigator.clipboard.writeText(inviteLink)
     setLinkCopied(true)
+    toast.info('Link copied to clipboard')
     setTimeout(() => setLinkCopied(false), 2000)
   }
 
   async function copyMessage() {
     await navigator.clipboard.writeText(message)
     setMessageCopied(true)
+    toast.info('Message copied to clipboard')
     setTimeout(() => setMessageCopied(false), 2000)
   }
 

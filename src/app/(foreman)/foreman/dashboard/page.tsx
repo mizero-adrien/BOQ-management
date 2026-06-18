@@ -83,8 +83,8 @@ export default function ForemanDashboardPage() {
           <div className="grid grid-cols-3 gap-3 mb-4">
             {[
               { label: 'Present', value: present, color: '#00236F' },
-              { label: 'Absent', value: Math.max(0, engineers.length - present), color: '#E24B4A' },
-              { label: 'Total', value: engineers.length, color: '#111111' },
+              { label: 'Active tasks', value: activeTasks.length, color: '#778EDE' },
+              { label: 'Team size', value: members.length, color: '#111111' },
             ].map((s) => (
               <div key={s.label} className="text-center">
                 <p className="font-bold" style={{ fontSize: '32px', color: s.color, lineHeight: 1 }}>{s.value}</p>
