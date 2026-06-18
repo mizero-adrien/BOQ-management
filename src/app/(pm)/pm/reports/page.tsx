@@ -8,6 +8,8 @@ import { usePMReports } from '@/hooks/usePMReports'
 import type { ReportStatus } from '@/types/database'
 import ReportsTable from '@/components/pm/reports/ReportsTable'
 import ReportCard from '@/components/pm/ReportCard'
+import NoProjectsEmptyState from '@/components/pm/NoProjectsEmptyState'
+import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
 import { SkeletonTable } from '@/components/shared/Skeleton'
 
 function sevenDaysAgo() {
@@ -20,7 +22,7 @@ function todayStr() { return new Date().toISOString().split('T')[0] }
 const STATUS_PILLS: ['' | ReportStatus, string][] = [['', 'All'], ['submitted', 'Submitted'], ['draft', 'Draft']]
 
 export default function PMReportsPage() {
-  const { projects, loading: projectsLoading } = usePMProjects()
+  const { projects, loading: projectsLoading, error: projectsError } = usePMProjects()
   const [projectId, setProjectId] = useState('')
   const [dateFrom, setDateFrom] = useState(sevenDaysAgo)
   const [dateTo, setDateTo]     = useState(todayStr)
@@ -39,6 +41,26 @@ export default function PMReportsPage() {
     : (dateFrom !== sevenDaysAgo() || dateTo !== todayStr())
       ? 'No reports in this date range'
       : 'No reports have been submitted yet'
+
+  if (!projectsLoading && projectsError) return <ProjectsFetchError />
+
+  if (!projectsLoading && projects.length === 0) {
+    return (
+      <NoProjectsEmptyState
+        pageTitle="Reports"
+        pageSubtitle="Daily reports from your site engineers"
+        icon={
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00236F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+        }
+        body="Create a project first to start receiving daily reports from your site engineers."
+      />
+    )
+  }
 
   return (
     <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px 20px' }}>

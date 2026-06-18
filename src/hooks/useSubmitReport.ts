@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from '@/lib/toast'
 import type { Profile, Project } from '@/types/database'
 
 interface SubmitData {
@@ -31,21 +32,25 @@ export function useSubmitReport() {
     try {
       const today = new Date().toISOString().split('T')[0]
 
+      // upsert handles the case where a draft was saved earlier for today
       const { data: report, error: reportError } = await supabase
         .from('daily_reports')
-        .insert({
-          project_id: data.project.id,
-          engineer_id: data.userId,
-          zone_id: data.zoneId,
-          report_date: today,
-          workers_count: data.workersCount,
-          progress_pct: data.progressPct,
-          weather: data.weather,
-          notes: data.notes || null,
-          issues: data.issues || null,
-          status: 'submitted',
-          submitted_at: new Date().toISOString(),
-        })
+        .upsert(
+          {
+            project_id: data.project.id,
+            engineer_id: data.userId,
+            zone_id: data.zoneId,
+            report_date: today,
+            workers_count: data.workersCount,
+            progress_pct: data.progressPct,
+            weather: data.weather,
+            notes: data.notes || null,
+            issues: data.issues || null,
+            status: 'submitted',
+            submitted_at: new Date().toISOString(),
+          },
+          { onConflict: 'project_id,engineer_id,report_date' }
+        )
         .select('id')
         .single()
 
@@ -76,6 +81,19 @@ export function useSubmitReport() {
         })
       }
 
+      await supabase.from('notifications').insert({
+        user_id: data.project.pm_id,
+        project_id: data.project.id,
+        type: 'report_submitted',
+        title: `${data.profile.full_name} submitted a report`,
+        body: data.issues
+          ? `Issues: ${data.issues.slice(0, 80)}`
+          : `${data.workersCount} workers · ${data.progressPct}% progress`,
+        read: false,
+        action_url: `/pm/reports`,
+      })
+
+      toast.success('Report submitted', 'Your daily report has been saved')
       router.push('/dashboard')
       router.refresh()
     } catch {

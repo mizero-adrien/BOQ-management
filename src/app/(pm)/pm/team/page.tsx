@@ -8,14 +8,35 @@ import { usePMProjects } from '@/hooks/usePMProjects'
 import InviteByLinkTab from '@/components/pm/team/InviteByLinkTab'
 import AddExistingUserTab from '@/components/pm/team/AddExistingUserTab'
 import TeamMembersList from '@/components/pm/team/TeamMembersList'
-import { SkeletonTable } from '@/components/shared/Skeleton'
+import NoProjectsEmptyState from '@/components/pm/NoProjectsEmptyState'
+import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
 
 type TabId = 'add' | 'invite'
 
 export default function TeamPage() {
   const [activeTab, setActiveTab] = useState<TabId>('add')
   const { profile } = useProfile()
-  const { projects, loading: projectsLoading } = usePMProjects()
+  const { projects, loading: projectsLoading, error: projectsError } = usePMProjects()
+
+  if (!projectsLoading && projectsError) return <ProjectsFetchError />
+
+  if (!projectsLoading && projects.length === 0) {
+    return (
+      <NoProjectsEmptyState
+        pageTitle="Team"
+        pageSubtitle="Manage project members"
+        icon={
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00236F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        }
+        body="Create a project first before adding team members."
+      />
+    )
+  }
 
   return (
     <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px' }}>

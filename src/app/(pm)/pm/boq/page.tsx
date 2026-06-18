@@ -11,14 +11,17 @@ import BOQSectionList from '@/components/pm/boq/BOQSectionList'
 import BOQSkeleton from '@/components/pm/boq/BOQSkeleton'
 import EmptyBOQState from '@/components/pm/boq/EmptyBOQState'
 import ImportBOQModal from '@/components/pm/boq/ImportBOQModal'
+import AddSectionForm from '@/components/pm/boq/AddSectionForm'
+import NoProjectsBOQCard from '@/components/pm/boq/NoProjectsBOQCard'
+import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
+import { toast } from '@/lib/toast'
 
 export default function PMBOQPage() {
-  const { projects, loading: projectsLoading } = usePMProjects()
+  const { projects, loading: projectsLoading, error: projectsError } = usePMProjects()
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [showAddSection, setShowAddSection] = useState(false)
   const [showImport, setShowImport] = useState(false)
 
-  // Auto-select first project once the list arrives
   useEffect(() => {
     if (projects.length > 0 && !selectedProjectId) {
       setSelectedProjectId(projects[0].id)
@@ -31,9 +34,37 @@ export default function PMBOQPage() {
     addItem, updateItem, deleteItem,
   } = usePMBOQ(selectedProjectId)
 
-  const isLoading = projectsLoading || !selectedProjectId || boqLoading
+  // Only show skeleton while projects are loading or while BOQ loads for a selected project
+  const isLoading = projectsLoading || (projects.length > 0 && (!selectedProjectId || boqLoading))
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId)
+
+  function handleImportClick() {
+    if (!selectedProjectId) {
+      toast.info('No project selected', 'Create a project first to start your BOQ')
+      return
+    }
+    setShowImport(true)
+  }
+
+  function handleAddSectionClick() {
+    if (!selectedProjectId) {
+      toast.info('No project selected', 'Create a project first to start your BOQ')
+      return
+    }
+    setShowAddSection(true)
+  }
+
+  async function handleAddSection(title: string, pid: string): Promise<string | null> {
+    const id = await addSection(title, pid)
+    if (id) {
+      toast.success('Section added', title + ' has been added to the BOQ')
+      setShowAddSection(false)
+    } else {
+      toast.error('Could not add section', 'Please try again')
+    }
+    return id
+  }
 
   async function handleImport(parsedSections: ParsedBOQSection[]) {
     if (!selectedProjectId) return
@@ -48,7 +79,7 @@ export default function PMBOQPage() {
 
   return (
     <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-      {/* Header */}
+      {/* Header — always visible */}
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="font-semibold mb-1" style={{ color: '#111111', fontSize: '24px' }}>Bill of Quantities</h1>
@@ -57,7 +88,7 @@ export default function PMBOQPage() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             type="button"
-            onClick={() => setShowImport(true)}
+            onClick={handleImportClick}
             className="hidden md:block px-3 py-2 rounded-lg text-xs font-medium"
             style={{ border: '1px solid #00236F', color: '#00236F' }}
           >
@@ -65,7 +96,7 @@ export default function PMBOQPage() {
           </button>
           <button
             type="button"
-            onClick={() => setShowImport(true)}
+            onClick={handleImportClick}
             className="md:hidden px-3 py-2 rounded-lg text-xs font-medium"
             style={{ border: '1px solid #00236F', color: '#00236F' }}
           >
@@ -73,7 +104,7 @@ export default function PMBOQPage() {
           </button>
           <button
             type="button"
-            onClick={() => setShowAddSection(true)}
+            onClick={handleAddSectionClick}
             className="px-3 py-2 rounded-lg text-xs font-semibold text-white"
             style={{ backgroundColor: '#00236F' }}
           >
@@ -110,9 +141,22 @@ export default function PMBOQPage() {
         </div>
       )}
 
+      {/* Add section form */}
+      {!isLoading && showAddSection && selectedProjectId && (
+        <AddSectionForm
+          projectId={selectedProjectId}
+          onSave={handleAddSection}
+          onCancel={() => setShowAddSection(false)}
+        />
+      )}
+
       {/* Content */}
       {isLoading ? (
         <BOQSkeleton />
+      ) : projectsError ? (
+        <ProjectsFetchError />
+      ) : projects.length === 0 ? (
+        <NoProjectsBOQCard />
       ) : !error && sections.length === 0 ? (
         <EmptyBOQState
           onAdd={() => setShowAddSection(true)}
@@ -124,7 +168,7 @@ export default function PMBOQPage() {
           <BOQSectionList
             sections={sections}
             projectId={selectedProjectId!}
-            showAddForm={showAddSection}
+            showAddForm={false}
             onFormClose={() => setShowAddSection(false)}
             onAddSection={addSection}
             onUpdateSection={updateSection}

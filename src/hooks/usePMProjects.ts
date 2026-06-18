@@ -7,44 +7,46 @@ import type { Project } from '@/types/database'
 export function usePMProjects() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
-    const controller = new AbortController()
+    let cancelled = false
 
     const timeout = setTimeout(() => {
-      controller.abort()
-      setLoading(false)
-      console.error('usePMProjects: query timed out after 8 s')
-    }, 8000)
+      if (!cancelled) {
+        cancelled = true
+        setLoading(false)
+        setError('Request timed out. Please reload the page.')
+      }
+    }, 20000)
 
     async function fetchProjects() {
       try {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
-
         if (userError || !user) return
 
-        const { data, error } = await supabase
+        const { data, error: fetchError } = await supabase
           .from('projects')
           .select('*')
           .eq('pm_id', user.id)
           .order('created_at', { ascending: false })
-          .abortSignal(controller.signal)
 
-        if (controller.signal.aborted) return
+        if (cancelled) return
 
-        if (error) {
-          console.error('usePMProjects: fetch failed:', error.message)
+        if (fetchError) {
+          setError(fetchError.message)
           return
         }
 
         setProjects(data ?? [])
+        setError(null)
       } catch (err) {
-        if (!controller.signal.aborted) {
-          console.error('usePMProjects: unexpected error:', err)
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load projects')
         }
       } finally {
-        if (!controller.signal.aborted) {
+        if (!cancelled) {
           clearTimeout(timeout)
           setLoading(false)
         }
@@ -54,10 +56,10 @@ export function usePMProjects() {
     fetchProjects()
 
     return () => {
-      controller.abort()
+      cancelled = true
       clearTimeout(timeout)
     }
   }, [])
 
-  return { projects, loading }
+  return { projects, loading, error }
 }
