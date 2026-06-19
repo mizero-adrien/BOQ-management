@@ -54,7 +54,6 @@ DROP POLICY IF EXISTS "Project members can post messages"  ON public.project_mes
 CREATE POLICY "Project members can read messages" ON public.project_messages
   FOR SELECT USING (
     project_id IN (SELECT public.get_user_project_ids())
-    OR project_id IN (SELECT id FROM public.projects WHERE owner_id = auth.uid())
   );
 
 CREATE POLICY "Project members can post messages" ON public.project_messages
