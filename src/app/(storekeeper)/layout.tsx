@@ -19,6 +19,7 @@ function icon(path: React.ReactNode, active: boolean, filled = false) {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/storekeeper/dashboard', icon: (a) => icon(<><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></>, a, true) },
+  { label: 'Messages', href: '/storekeeper/messages', icon: (a) => icon(<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />, a) },
   { label: 'Stock In', href: '/storekeeper/stock-in', icon: (a) => icon(<><polyline points="8 17 12 21 16 17" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" /></>, a) },
   { label: 'Stock Out', href: '/storekeeper/stock-out', icon: (a) => icon(<><polyline points="16 7 12 3 8 7" /><line x1="12" y1="12" x2="12" y2="3" /><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" /></>, a) },
   { label: 'Inventory', href: '/storekeeper/inventory', icon: (a) => icon(<><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></>, a) },

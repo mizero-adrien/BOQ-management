@@ -19,6 +19,7 @@ function icon(path: React.ReactNode, active: boolean, filled = false) {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/qs/dashboard', icon: (a) => icon(<><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></>, a, true) },
+  { label: 'Messages', href: '/qs/messages', icon: (a) => icon(<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />, a) },
   { label: 'BOQ', href: '/qs/boq', icon: (a) => icon(<><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="7" y1="8" x2="7" y2="12" /><line x1="12" y1="6" x2="12" y2="12" /><line x1="17" y1="10" x2="17" y2="12" /></>, a) },
   { label: 'Cost Report', href: '/qs/costs', icon: (a) => icon(<><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></>, a) },
   { label: 'Variance', href: '/qs/variance', icon: (a) => icon(<><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></>, a) },
