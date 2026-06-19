@@ -31,11 +31,20 @@ export default function ProfilePage() {
 
       const [profileRes, memberRes, companyMemberRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('project_members').select('role, project:projects!project_members_project_id_fkey(name)').eq('user_id', user.id).limit(1).maybeSingle(),
+        supabase.from('project_members').select('role, project:projects!project_members_project_id_fkey(name)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
         supabase.from('company_members').select('company:companies!company_members_company_id_fkey(name)').eq('user_id', user.id).limit(1).maybeSingle(),
       ])
 
-      if (profileRes.data) setProfile(profileRes.data as Profile)
+      if (profileRes.data) {
+        const dbProfile = profileRes.data as Profile
+        const metaRole = user.user_metadata?.role as string | undefined
+        if (metaRole && metaRole !== dbProfile.role) {
+          supabase.from('profiles').update({ role: metaRole }).eq('id', user.id).then(() => {})
+          setProfile({ ...dbProfile, role: metaRole as Profile['role'] })
+        } else {
+          setProfile(dbProfile)
+        }
+      }
 
       type ProjectJoin = { role: string; project: { name: string } | null }
       type CompanyJoin = { company: { name: string } | null }

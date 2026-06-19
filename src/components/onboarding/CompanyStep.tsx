@@ -27,13 +27,11 @@ interface CompanyStepProps {
 
 async function ensureProfileExists(userId: string, fullName: string): Promise<boolean> {
   const supabase = createClient()
-  const { data } = await supabase.from('profiles').select('id').eq('id', userId).single()
-  if (data) return true
   const { error } = await supabase
     .from('profiles')
-    .insert({ id: userId, full_name: fullName, role: 'pm' })
+    .upsert({ id: userId, full_name: fullName, role: 'pm' }, { onConflict: 'id' })
   if (error) {
-    console.error('Profile creation error:', error.message)
+    console.error('Profile upsert error:', error.message)
     return false
   }
   return true
