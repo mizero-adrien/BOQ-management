@@ -31,6 +31,12 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
   const supabase = createClient()
   const cache = useRef<Map<string, ProfileEntry>>(new Map())
 
+  const ensureProfile = useCallback(async (uid: string) => {
+    if (cache.current.has(uid)) return
+    const { data } = await supabase.from('profiles').select('id, full_name, role').eq('id', uid).single()
+    if (data) cache.current.set(data.id, { full_name: data.full_name, role: data.role })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!projectId || !partnerId || !userId) return
     let active = true
@@ -47,7 +53,7 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
 
       if (!active || !rows) { setLoading(false); return }
 
-      const ids = [...new Set(rows.map((r) => r.sender_id))]
+      const ids = [...new Set([...rows.map((r) => r.sender_id), userId].filter(Boolean))]
       if (ids.length) {
         const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', ids)
         profiles?.forEach((p) => cache.current.set(p.id, { full_name: p.full_name, role: p.role }))
@@ -77,12 +83,10 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
             (row.sender_id === userId && row.recipient_id === partnerId) ||
             (row.sender_id === partnerId && row.recipient_id === userId)
           if (!involves) return
-          if (!cache.current.has(row.sender_id)) {
-            const { data } = await supabase.from('profiles').select('id, full_name, role').eq('id', row.sender_id).single()
-            if (data) cache.current.set(data.id, { full_name: data.full_name, role: data.role })
-          }
+          await ensureProfile(row.sender_id)
           const enriched = { ...row, sender_name: cache.current.get(row.sender_id)?.full_name ?? 'Unknown' }
-          setMessages((prev) => [...prev, enriched])
+          // Deduplicate: send() already adds the message optimistically
+          setMessages((prev) => prev.some((m) => m.id === enriched.id) ? prev : [...prev, enriched])
           if (row.recipient_id === userId) {
             supabase.from('direct_messages').update({ read_at: new Date().toISOString() }).eq('id', row.id).then(() => {})
           }
@@ -99,13 +103,19 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
   const send = useCallback(
     async (body: string) => {
       if (!body.trim()) return
-      await supabase.from('direct_messages').insert({
-        project_id: projectId,
-        recipient_id: partnerId,
-        body: body.trim(),
-      })
+      // Insert and get the row back so we can add it immediately without waiting for Realtime
+      const { data: newMsg } = await supabase
+        .from('direct_messages')
+        .insert({ project_id: projectId, recipient_id: partnerId, body: body.trim() })
+        .select('id, project_id, sender_id, recipient_id, body, read_at, created_at')
+        .single()
+      if (newMsg) {
+        await ensureProfile(newMsg.sender_id)
+        const enriched = { ...newMsg, sender_name: cache.current.get(newMsg.sender_id)?.full_name ?? 'Unknown' }
+        setMessages((prev) => prev.some((m) => m.id === enriched.id) ? prev : [...prev, enriched])
+      }
     },
-    [projectId, partnerId] // eslint-disable-line react-hooks/exhaustive-deps
+    [projectId, partnerId, ensureProfile] // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   return { messages, loading, send }

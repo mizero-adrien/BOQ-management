@@ -15,7 +15,7 @@ export interface ProjectMessage {
 
 type ProfileEntry = { full_name: string; role: string }
 
-export function useProjectMessages(projectId: string) {
+export function useProjectMessages(projectId: string, userId: string) {
   const [messages, setMessages] = useState<ProjectMessage[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -28,6 +28,12 @@ export function useProjectMessages(projectId: string) {
     },
     []
   )
+
+  const ensureProfile = useCallback(async (uid: string) => {
+    if (cache.current.has(uid)) return
+    const { data } = await supabase.from('profiles').select('id, full_name, role').eq('id', uid).single()
+    if (data) cache.current.set(data.id, { full_name: data.full_name, role: data.role })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!projectId) return
@@ -42,7 +48,8 @@ export function useProjectMessages(projectId: string) {
 
       if (!active || !rows) { setLoading(false); return }
 
-      const ids = [...new Set(rows.map((r) => r.sender_id))]
+      // Pre-load current user's profile so own sent messages hydrate correctly
+      const ids = [...new Set([...rows.map((r) => r.sender_id), userId].filter(Boolean))]
       if (ids.length) {
         const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', ids)
         profiles?.forEach((p) => cache.current.set(p.id, { full_name: p.full_name, role: p.role }))
@@ -59,11 +66,9 @@ export function useProjectMessages(projectId: string) {
         { event: 'INSERT', schema: 'public', table: 'project_messages', filter: `project_id=eq.${projectId}` },
         async (payload) => {
           const row = payload.new as { id: string; project_id: string; sender_id: string; body: string; created_at: string }
-          if (!cache.current.has(row.sender_id)) {
-            const { data } = await supabase.from('profiles').select('id, full_name, role').eq('id', row.sender_id).single()
-            if (data) cache.current.set(data.id, { full_name: data.full_name, role: data.role })
-          }
-          setMessages((prev) => [...prev, hydrate(row)])
+          await ensureProfile(row.sender_id)
+          // Deduplicate: send() already adds the message optimistically
+          setMessages((prev) => prev.some((m) => m.id === row.id) ? prev : [...prev, hydrate(row)])
         }
       )
       .subscribe()
@@ -77,9 +82,18 @@ export function useProjectMessages(projectId: string) {
   const send = useCallback(
     async (body: string) => {
       if (!body.trim() || !projectId) return
-      await supabase.from('project_messages').insert({ project_id: projectId, body: body.trim() })
+      // Insert and get the row back so we can add it immediately without waiting for Realtime
+      const { data: newMsg } = await supabase
+        .from('project_messages')
+        .insert({ project_id: projectId, body: body.trim() })
+        .select('id, project_id, sender_id, body, created_at')
+        .single()
+      if (newMsg) {
+        await ensureProfile(newMsg.sender_id)
+        setMessages((prev) => prev.some((m) => m.id === newMsg.id) ? prev : [...prev, hydrate(newMsg)])
+      }
     },
-    [projectId] // eslint-disable-line react-hooks/exhaustive-deps
+    [projectId, hydrate, ensureProfile] // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   return { messages, loading, send }

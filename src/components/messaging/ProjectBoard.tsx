@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function ProjectBoard({ projectId, userId }: Props) {
-  const { messages, loading, send } = useProjectMessages(projectId)
+  const { messages, loading, send } = useProjectMessages(projectId, userId)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
