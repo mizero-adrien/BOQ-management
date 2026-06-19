@@ -38,10 +38,10 @@ export default async function SharePage({ params }: Props) {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [zonesRes, reportsRes, sectionsRes, tasksRes] = await Promise.all([
+  const [zonesRes, reportsRes, boqSectionsRes, tasksRes] = await Promise.all([
     supabase.from('plan_zones').select('*').eq('project_id', project.id).order('created_at'),
     supabase.from('daily_reports').select('id, report_date, workers_count, progress_pct, issues, status, photos:report_photos(id, url, caption)').eq('project_id', project.id).order('report_date', { ascending: false }).limit(15),
-    supabase.rpc('get_boq_summary_for_owner', { p_project_id: project.id }),
+    supabase.from('boq_sections').select('id, title, order_index').eq('project_id', project.id).order('order_index'),
     supabase.from('tasks').select('id, title, due_date, status').eq('project_id', project.id).in('status', ['not_started', 'in_progress', 'overdue']).order('due_date').limit(8),
   ])
 
@@ -49,15 +49,22 @@ export default async function SharePage({ params }: Props) {
   const reports = reportsRes.data ?? []
   const tasks = tasksRes.data ?? []
 
-  type SummaryRow = { section_id: string; section_title: string; total_budgeted: number; total_used: number }
-  const rawSummary = (sectionsRes.data ?? []) as SummaryRow[]
-  const sections = rawSummary.map((s) => ({
-    id: s.section_id,
-    title: s.section_title,
-    total_budgeted: Number(s.total_budgeted),
-    total_used: Number(s.total_used),
-    items_count: 0,
-  }))
+  const rawSections = boqSectionsRes.data ?? []
+  const sectionItems = rawSections.length > 0
+    ? await supabase.from('boq_items').select('section_id, budgeted_total, used_total').in('section_id', rawSections.map((s) => s.id as string))
+    : { data: [] }
+  const itemRows = sectionItems.data ?? []
+
+  const sections = rawSections.map((s) => {
+    const its = itemRows.filter((i) => i.section_id === s.id)
+    return {
+      id: s.id as string,
+      title: s.title as string,
+      total_budgeted: its.reduce((sum, i) => sum + (Number(i.budgeted_total) || 0), 0),
+      total_used: its.reduce((sum, i) => sum + (Number(i.used_total) || 0), 0),
+      items_count: its.length,
+    }
+  })
 
   const totalBudgeted = sections.reduce((s, sec) => s + sec.total_budgeted, 0)
   const totalUsed = sections.reduce((s, sec) => s + sec.total_used, 0)
