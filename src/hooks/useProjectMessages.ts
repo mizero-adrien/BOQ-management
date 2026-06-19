@@ -85,7 +85,7 @@ export function useProjectMessages(projectId: string, userId: string) {
       // Insert and get the row back so we can add it immediately without waiting for Realtime
       const { data: newMsg } = await supabase
         .from('project_messages')
-        .insert({ project_id: projectId, body: body.trim() })
+        .insert({ project_id: projectId, sender_id: userId, body: body.trim() })
         .select('id, project_id, sender_id, body, created_at')
         .single()
       if (newMsg) {
@@ -93,7 +93,7 @@ export function useProjectMessages(projectId: string, userId: string) {
         setMessages((prev) => prev.some((m) => m.id === newMsg.id) ? prev : [...prev, hydrate(newMsg)])
       }
     },
-    [projectId, hydrate, ensureProfile] // eslint-disable-line react-hooks/exhaustive-deps
+    [projectId, userId, hydrate, ensureProfile] // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   return { messages, loading, send }

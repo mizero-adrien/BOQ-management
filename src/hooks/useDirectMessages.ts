@@ -106,7 +106,7 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
       // Insert and get the row back so we can add it immediately without waiting for Realtime
       const { data: newMsg } = await supabase
         .from('direct_messages')
-        .insert({ project_id: projectId, recipient_id: partnerId, body: body.trim() })
+        .insert({ project_id: projectId, sender_id: userId, recipient_id: partnerId, body: body.trim() })
         .select('id, project_id, sender_id, recipient_id, body, read_at, created_at')
         .single()
       if (newMsg) {
@@ -115,7 +115,7 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
         setMessages((prev) => prev.some((m) => m.id === enriched.id) ? prev : [...prev, enriched])
       }
     },
-    [projectId, partnerId, ensureProfile] // eslint-disable-line react-hooks/exhaustive-deps
+    [projectId, partnerId, userId, ensureProfile] // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   return { messages, loading, send }
