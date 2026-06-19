@@ -4,6 +4,7 @@ import MobileTopBar from '@/components/layout/MobileTopBar'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import PageErrorBoundary from '@/components/shared/PageErrorBoundary'
 import ToastContainer from '@/components/shared/ToastContainer'
+import OfflineSyncBanner from '@/components/shared/OfflineSyncBanner'
 
 export default function EngineerLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ export default function EngineerLayout({ children }: { children: React.ReactNode
           </main>
           <BottomNav />
         </div>
+        <OfflineSyncBanner />
         <ToastContainer />
       </NotificationProvider>
     </PageErrorBoundary>

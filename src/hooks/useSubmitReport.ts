@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from '@/lib/toast'
+import { saveOfflineReport } from '@/lib/offlineReports'
 import type { Profile, Project } from '@/types/database'
 
 interface SubmitData {
@@ -28,6 +29,42 @@ export function useSubmitReport() {
   async function submit(data: SubmitData) {
     setError(null)
     setSubmitting(true)
+
+    // Offline path — save to IndexedDB and let useSyncPendingReports replay it when online
+    if (!navigator.onLine) {
+      try {
+        const photoData = await Promise.all(
+          data.photos.map(async (file) => ({
+            name: file.name,
+            type: file.type,
+            data: await file.arrayBuffer(),
+          }))
+        )
+        await saveOfflineReport({
+          id: crypto.randomUUID(),
+          savedAt: new Date().toISOString(),
+          reportDate: new Date().toISOString().split('T')[0],
+          projectId: data.project.id,
+          projectName: data.project.name,
+          pmId: data.project.pm_id,
+          userId: data.userId,
+          engineerName: data.profile.full_name,
+          zoneId: data.zoneId,
+          workersCount: data.workersCount,
+          progressPct: data.progressPct,
+          weather: data.weather,
+          notes: data.notes,
+          issues: data.issues,
+          photos: photoData,
+        })
+        toast.success('Saved offline', 'Report queued — will sync when you reconnect')
+        router.push('/dashboard')
+      } catch {
+        setError('Could not save report offline. Please try again.')
+      }
+      setSubmitting(false)
+      return
+    }
 
     try {
       const today = new Date().toISOString().split('T')[0]
