@@ -2,7 +2,8 @@
 
 export const dynamic = 'force-dynamic'
 
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useOwnerBOQSummary } from '@/hooks/useOwnerBOQSummary'
@@ -24,27 +25,31 @@ function ProgressBar({ pct }: { pct: number }) {
   )
 }
 
-export default function OwnerOverviewPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = use(params)
+export default function OwnerOverviewPage() {
+  const params = useParams()
+  const projectId = params.projectId as string
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
-  const { sections } = useOwnerBOQSummary(project?.id)
+  const { sections } = useOwnerBOQSummary(projectId)
 
   const totalBudget = sections.reduce((s, sec) => s + sec.total_budgeted, 0)
   const totalUsed = sections.reduce((s, sec) => s + sec.total_used, 0)
   const budgetPct = totalBudget > 0 ? Math.round((totalUsed / totalBudget) * 100) : 0
 
   useEffect(() => {
+    if (!projectId) return
     const supabase = createClient()
     supabase.from('projects').select('*').eq('id', projectId).single()
       .then(({ data }) => { setProject(data); setLoading(false) })
   }, [projectId])
 
   if (loading) {
-    return <div className="animate-pulse px-4 py-5 space-y-4">
-      <div className="h-8 w-64 rounded" style={{ backgroundColor: '#EEEEEE' }} />
-      <div className="h-40 rounded-xl" style={{ backgroundColor: '#EEEEEE' }} />
-    </div>
+    return (
+      <div className="animate-pulse px-4 py-5 space-y-4">
+        <div className="h-8 w-64 rounded" style={{ backgroundColor: '#EEEEEE' }} />
+        <div className="h-40 rounded-xl" style={{ backgroundColor: '#EEEEEE' }} />
+      </div>
+    )
   }
 
   if (!project) {
@@ -56,7 +61,6 @@ export default function OwnerOverviewPage({ params }: { params: Promise<{ projec
       <h1 className="font-bold mb-0.5" style={{ color: '#111111', fontSize: '26px' }}>{project.name}</h1>
       <p className="text-sm mb-6" style={{ color: '#666666' }}>{project.client_name}</p>
 
-      {/* Progress card */}
       <div className="bg-white rounded-xl p-5 mb-4" style={{ border: '0.5px solid #EEEEEE' }}>
         <ProgressBar pct={project.overall_progress} />
         <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t" style={{ borderColor: '#EEEEEE' }}>
@@ -71,7 +75,6 @@ export default function OwnerOverviewPage({ params }: { params: Promise<{ projec
         </div>
       </div>
 
-      {/* Budget snapshot */}
       <div className="grid grid-cols-2 gap-3 mb-5">
         <div className="bg-white rounded-xl p-4" style={{ border: '0.5px solid #EEEEEE' }}>
           <p className="text-xl font-bold" style={{ color: '#111111' }}>{formatCurrency(totalBudget)}</p>
@@ -83,7 +86,6 @@ export default function OwnerOverviewPage({ params }: { params: Promise<{ projec
         </div>
       </div>
 
-      {/* Quick nav */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: 'Photos', href: `/owner/${projectId}/photos` },

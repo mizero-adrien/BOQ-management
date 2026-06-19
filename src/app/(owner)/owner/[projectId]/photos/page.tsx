@@ -2,7 +2,8 @@
 
 export const dynamic = 'force-dynamic'
 
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDate } from '@/lib/utils/index'
 
@@ -13,8 +14,9 @@ interface Photo {
   uploaded_at: string
 }
 
-export default function OwnerPhotosPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = use(params)
+export default function OwnerPhotosPage() {
+  const params = useParams()
+  const projectId = params.projectId as string
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Photo | null>(null)

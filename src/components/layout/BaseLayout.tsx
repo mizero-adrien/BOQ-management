@@ -13,6 +13,7 @@ export interface NavItem {
   label: string
   href: string
   icon: (active: boolean) => React.ReactNode
+  exact?: boolean
 }
 
 interface BaseLayoutProps {
@@ -21,8 +22,8 @@ interface BaseLayoutProps {
   backButton?: boolean
 }
 
-function navIsActive(pathname: string, href: string): boolean {
-  if (href.endsWith('/dashboard') || href.endsWith('/profile') || href === '/dashboard') {
+function navIsActive(pathname: string, href: string, exact?: boolean): boolean {
+  if (exact || href.endsWith('/dashboard') || href.endsWith('/profile') || href === '/dashboard') {
     return pathname === href
   }
   return pathname.startsWith(href)
@@ -80,7 +81,7 @@ function BaseSidebar({ navItems, backButton }: { navItems: NavItem[]; backButton
 
       <nav className="flex-1 py-3 space-y-0.5">
         {navItems.map((item) => {
-          const active = navIsActive(pathname, item.href)
+          const active = navIsActive(pathname, item.href, item.exact)
           return (
             <Link key={item.href} href={item.href}
               className="flex items-center gap-3 mx-2 px-4 py-2.5 rounded-lg"
@@ -118,7 +119,7 @@ function BaseBottomNav({ navItems }: { navItems: NavItem[] }) {
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-50 md:hidden" style={{ borderColor: '#EEEEEE', borderTopWidth: '1px' }} aria-label="Main navigation">
       <div className="flex items-center justify-around px-2 h-16">
         {navItems.slice(0, 5).map((item) => {
-          const active = navIsActive(pathname, item.href)
+          const active = navIsActive(pathname, item.href, item.exact)
           return (
             <Link key={item.href} href={item.href}
               className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full"

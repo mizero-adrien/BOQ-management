@@ -2,18 +2,14 @@
 
 export const dynamic = 'force-dynamic'
 
-import { use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useReportDetail } from '@/hooks/useReportDetail'
 import { formatDate } from '@/lib/utils'
 import PhotoGrid from '@/components/pm/reports/PhotoGrid'
 
-interface Props {
-  params: Promise<{ projectId: string; reportId: string }>
-}
-
-export default function OwnerReportDetailPage({ params }: Props) {
-  const { reportId } = use(params)
+export default function OwnerReportDetailPage() {
+  const params = useParams()
+  const reportId = params.reportId as string
   const { report, tasks, loading } = useReportDetail(reportId)
   const router = useRouter()
 

@@ -2,8 +2,8 @@
 
 export const dynamic = 'force-dynamic'
 
-import { use, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatDate } from '@/lib/utils/index'
 
@@ -18,8 +18,9 @@ interface ReportRow {
   status: string
 }
 
-export default function OwnerReportsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = use(params)
+export default function OwnerReportsPage() {
+  const params = useParams()
+  const projectId = params.projectId as string
   const router = useRouter()
   const [reports, setReports] = useState<ReportRow[]>([])
   const [loading, setLoading] = useState(true)
