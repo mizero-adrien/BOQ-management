@@ -39,6 +39,7 @@ export default function DirectChat({ projectId, userId, partnerId, partnerName, 
           <button
             type="button"
             onClick={onBack}
+            className="md:hidden"
             style={{
               background: 'none',
               border: 'none',
@@ -58,36 +59,35 @@ export default function DirectChat({ projectId, userId, partnerId, partnerName, 
       </div>
 
       {/* Messages */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          padding: '16px',
-        }}
-      >
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         {loading && (
-          <p style={{ textAlign: 'center', color: '#BBBBBB', fontSize: '14px', paddingTop: '40px' }}>Loading...</p>
-        )}
-        {!loading && messages.length === 0 && (
-          <div style={{ textAlign: 'center', paddingTop: '60px' }}>
-            <p style={{ color: '#BBBBBB', fontSize: '14px' }}>No messages yet.</p>
-            <p style={{ color: '#BBBBBB', fontSize: '13px', marginTop: '4px' }}>Send a message to {partnerName}.</p>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#BBBBBB', fontSize: '14px', margin: 0 }}>Loading...</p>
           </div>
         )}
-        {messages.map((msg) => (
-          <MessageBubble
-            key={msg.id}
-            body={msg.body}
-            senderName={msg.sender_name}
-            senderRole=""
-            createdAt={msg.created_at}
-            isMine={msg.sender_id === userId}
-          />
-        ))}
-        <div ref={bottomRef} />
+        {!loading && messages.length === 0 && (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '8px', padding: '32px 24px', textAlign: 'center' }}>
+            <p style={{ fontSize: '15px', fontWeight: 600, color: '#111111', margin: 0 }}>No messages yet</p>
+            <p style={{ fontSize: '13px', color: '#BBBBBB', margin: 0, lineHeight: 1.55 }}>
+              Send {partnerName} a message to start the conversation.
+            </p>
+          </div>
+        )}
+        {!loading && messages.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px' }}>
+            {messages.map((msg) => (
+              <MessageBubble
+                key={msg.id}
+                body={msg.body}
+                senderName={msg.sender_name}
+                senderRole=""
+                createdAt={msg.created_at}
+                isMine={msg.sender_id === userId}
+              />
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        )}
       </div>
 
       <MessageInput onSend={send} placeholder={`Message ${partnerName}...`} />
