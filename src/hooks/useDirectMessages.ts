@@ -125,6 +125,10 @@ export function useConversations(projectId: string, userId: string) {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
+  // Each hook instance needs a unique channel name; two callers (MessagesPage +
+  // MessagesButton) would otherwise share the same name and Supabase rejects the
+  // second .on() call with "cannot add callbacks after subscribe()".
+  const instanceId = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`).current
 
   useEffect(() => {
     if (!projectId || !userId) return
@@ -171,7 +175,7 @@ export function useConversations(projectId: string, userId: string) {
     load()
 
     const channel = supabase
-      .channel(`convs:${projectId}:${userId}`)
+      .channel(`convs:${projectId}:${userId}:${instanceId}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'direct_messages', filter: `project_id=eq.${projectId}` },
