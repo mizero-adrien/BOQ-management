@@ -6,6 +6,7 @@ import { useProfile } from '@/hooks/useProfile'
 import { useSignOut } from '@/hooks/useSignOut'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
+import MessagesButton from '@/components/shared/MessagesButton'
 import { formatRole } from '@/lib/utils/roleLabels'
 import MobileTopBar from '@/components/layout/MobileTopBar'
 
@@ -20,6 +21,7 @@ interface BaseLayoutProps {
   children: React.ReactNode
   navItems: NavItem[]
   backButton?: boolean
+  messagesHref?: string
 }
 
 function navIsActive(pathname: string, href: string, exact?: boolean): boolean {
@@ -40,7 +42,7 @@ function LogoIcon() {
   )
 }
 
-function BaseSidebar({ navItems, backButton }: { navItems: NavItem[]; backButton?: boolean }) {
+function BaseSidebar({ navItems, backButton, messagesHref }: { navItems: NavItem[]; backButton?: boolean; messagesHref?: string }) {
   const pathname = usePathname()
   const router = useRouter()
   const { profile } = useProfile()
@@ -59,7 +61,10 @@ function BaseSidebar({ navItems, backButton }: { navItems: NavItem[]; backButton
             Construction<br />Manager
           </span>
         </div>
-        <NotificationBell unreadCount={unreadCount} />
+        <div className="flex items-center gap-1">
+          {messagesHref && <MessagesButton href={messagesHref} />}
+          <NotificationBell unreadCount={unreadCount} />
+        </div>
       </div>
       <div className="border-b" style={{ borderColor: '#EEEEEE' }} />
 
@@ -135,11 +140,11 @@ function BaseBottomNav({ navItems }: { navItems: NavItem[] }) {
   )
 }
 
-export default function BaseLayout({ children, navItems, backButton }: BaseLayoutProps) {
+export default function BaseLayout({ children, navItems, backButton, messagesHref }: BaseLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F5F6FA' }}>
-      <MobileTopBar backButton={backButton} />
-      <BaseSidebar navItems={navItems} backButton={backButton} />
+      <MobileTopBar backButton={backButton} messagesHref={messagesHref} />
+      <BaseSidebar navItems={navItems} backButton={backButton} messagesHref={messagesHref} />
       <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">{children}</main>
       <BaseBottomNav navItems={navItems} />
     </div>

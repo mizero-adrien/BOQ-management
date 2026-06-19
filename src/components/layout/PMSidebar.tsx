@@ -6,11 +6,11 @@ import { useProfile } from '@/hooks/useProfile'
 import { useSignOut } from '@/hooks/useSignOut'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
+import MessagesButton from '@/components/shared/MessagesButton'
 
 const navItems = [
   { label: 'Dashboard', href: '/pm/dashboard', icon: DashboardIcon },
   { label: 'Schedule', href: '/pm/schedule', icon: ScheduleIcon },
-  { label: 'Messages', href: '/pm/messages', icon: MessagesIcon },
   { label: 'Reports', href: '/pm/reports', icon: ReportsIcon },
   { label: 'Projects', href: '/pm/projects', icon: ProjectsIcon },
   { label: 'Team', href: '/pm/team', icon: TeamIcon },
@@ -52,7 +52,10 @@ export default function PMSidebar() {
             Construction<br />Manager
           </span>
         </div>
-        <NotificationBell unreadCount={unreadCount} />
+        <div className="flex items-center gap-1">
+          <MessagesButton href="/pm/messages" />
+          <NotificationBell unreadCount={unreadCount} />
+        </div>
       </div>
       <div className="border-b" style={{ borderColor: '#EEEEEE' }} />
 
@@ -228,10 +231,3 @@ function SettingsIcon({ active }: { active: boolean }) {
   )
 }
 
-function MessagesIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  )
-}

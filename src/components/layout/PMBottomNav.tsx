@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 const navItems = [
   { label: 'Dashboard', href: '/pm/dashboard', icon: DashboardIcon },
   { label: 'Schedule', href: '/pm/schedule', icon: ScheduleIcon },
-  { label: 'Messages', href: '/pm/messages', icon: MessagesIcon },
   { label: 'Reports', href: '/pm/reports', icon: ReportsIcon },
   { label: 'Team', href: '/pm/team', icon: TeamIcon },
   { label: 'BOQ', href: '/pm/boq', icon: BOQIcon },
@@ -104,10 +103,3 @@ function BOQIcon({ active }: { active: boolean }) {
   )
 }
 
-function MessagesIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  )
-}

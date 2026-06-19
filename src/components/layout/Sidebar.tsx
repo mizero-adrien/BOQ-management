@@ -6,12 +6,12 @@ import { useProfile } from '@/hooks/useProfile'
 import { useSignOut } from '@/hooks/useSignOut'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
+import MessagesButton from '@/components/shared/MessagesButton'
 
 const navItems = [
   { label: 'Home', href: '/dashboard', icon: HomeIcon },
   { label: 'Report', href: '/report/new', icon: ReportIcon },
   { label: 'BOQ', href: '/boq', icon: BOQIcon },
-  { label: 'Messages', href: '/messages', icon: MessagesIcon },
   { label: 'Tasks', href: '/tasks', icon: TasksIcon },
   { label: 'Me', href: '/profile', icon: ProfileIcon },
 ]
@@ -56,7 +56,10 @@ export default function Sidebar() {
             Manager
           </span>
         </div>
-        <NotificationBell unreadCount={unreadCount} />
+        <div className="flex items-center gap-1">
+          <MessagesButton href="/messages" />
+          <NotificationBell unreadCount={unreadCount} />
+        </div>
       </div>
       <div className="border-b" style={{ borderColor: '#EEEEEE' }} />
 
@@ -208,10 +211,3 @@ function ProfileIcon({ active }: { active: boolean }) {
   )
 }
 
-function MessagesIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  )
-}

@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
+import MessagesButton from '@/components/shared/MessagesButton'
 
 interface Props {
   backButton?: boolean
+  messagesHref?: string
 }
 
-export default function MobileTopBar({ backButton }: Props) {
+export default function MobileTopBar({ backButton, messagesHref }: Props) {
   const { unreadCount } = useNotifications()
   const router = useRouter()
 
@@ -55,7 +57,10 @@ export default function MobileTopBar({ backButton }: Props) {
           <span className="text-sm font-semibold" style={{ color: '#00236F' }}>Construction Manager</span>
         </Link>
       </div>
-      <NotificationBell unreadCount={unreadCount} />
+      <div className="flex items-center gap-1">
+        {messagesHref && <MessagesButton href={messagesHref} />}
+        <NotificationBell unreadCount={unreadCount} />
+      </div>
     </header>
   )
 }
