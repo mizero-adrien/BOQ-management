@@ -15,10 +15,11 @@ export interface OverflowItem {
 interface Props {
   backButton?: boolean
   messagesHref?: string
+  notificationsHref?: string
   overflowItems?: OverflowItem[]
 }
 
-export default function MobileTopBar({ backButton, messagesHref, overflowItems }: Props) {
+export default function MobileTopBar({ backButton, messagesHref, notificationsHref, overflowItems }: Props) {
   const { unreadCount } = useNotifications()
   const router = useRouter()
   const pathname = usePathname()
@@ -72,7 +73,7 @@ export default function MobileTopBar({ backButton, messagesHref, overflowItems }
 
         <div className="flex items-center gap-1">
           {messagesHref && <MessagesButton href={messagesHref} />}
-          <NotificationBell unreadCount={unreadCount} />
+          <NotificationBell unreadCount={unreadCount} href={notificationsHref} />
           {hasOverflow && (
             <button
               type="button"

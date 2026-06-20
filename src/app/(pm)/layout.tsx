@@ -9,7 +9,6 @@ const pmOverflowItems = [
   { label: 'Projects', href: '/pm/projects' },
   { label: 'Procurement', href: '/procurement/dashboard' },
   { label: 'Profile', href: '/pm/profile' },
-  { label: 'Notifications', href: '/pm/notifications' },
   { label: 'Settings', href: '/pm/settings' },
 ]
 
@@ -18,7 +17,7 @@ export default function PMLayout({ children }: { children: React.ReactNode }) {
     <PageErrorBoundary>
       <NotificationProvider>
         <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F5F6FA' }}>
-          <MobileTopBar messagesHref="/pm/messages" overflowItems={pmOverflowItems} />
+          <MobileTopBar messagesHref="/pm/messages" notificationsHref="/pm/notifications" overflowItems={pmOverflowItems} />
           <PMSidebar />
           <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">
             {children}

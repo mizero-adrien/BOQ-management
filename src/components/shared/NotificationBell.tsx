@@ -3,14 +3,14 @@
 import Link from 'next/link'
 import { useNotificationContext } from '@/contexts/NotificationContext'
 
-export default function NotificationBell({ unreadCount: propCount }: { unreadCount?: number }) {
+export default function NotificationBell({ unreadCount: propCount, href = '/notifications' }: { unreadCount?: number; href?: string }) {
   const ctx = useNotificationContext()
   const unreadCount = propCount !== undefined ? propCount : ctx.unreadCount
   const badgeLabel = unreadCount >= 10 ? '9+' : String(unreadCount)
 
   return (
     <Link
-      href="/notifications"
+      href={href}
       className="relative w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
       style={{ backgroundColor: '#F5F6FA' }}
       aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}

@@ -22,6 +22,7 @@ interface BaseLayoutProps {
   navItems: NavItem[]
   backButton?: boolean
   messagesHref?: string
+  notificationsHref?: string
 }
 
 function navIsActive(pathname: string, href: string, exact?: boolean): boolean {
@@ -42,7 +43,7 @@ function LogoIcon() {
   )
 }
 
-function BaseSidebar({ navItems, backButton, messagesHref }: { navItems: NavItem[]; backButton?: boolean; messagesHref?: string }) {
+function BaseSidebar({ navItems, backButton, messagesHref, notificationsHref }: { navItems: NavItem[]; backButton?: boolean; messagesHref?: string; notificationsHref?: string }) {
   const pathname = usePathname()
   const router = useRouter()
   const { profile } = useProfile()
@@ -63,7 +64,7 @@ function BaseSidebar({ navItems, backButton, messagesHref }: { navItems: NavItem
         </div>
         <div className="flex items-center gap-1">
           {messagesHref && <MessagesButton href={messagesHref} />}
-          <NotificationBell unreadCount={unreadCount} />
+          <NotificationBell unreadCount={unreadCount} href={notificationsHref} />
         </div>
       </div>
       <div className="border-b" style={{ borderColor: '#EEEEEE' }} />
@@ -140,12 +141,12 @@ function BaseBottomNav({ navItems }: { navItems: NavItem[] }) {
   )
 }
 
-export default function BaseLayout({ children, navItems, backButton, messagesHref }: BaseLayoutProps) {
+export default function BaseLayout({ children, navItems, backButton, messagesHref, notificationsHref }: BaseLayoutProps) {
   const overflowItems = navItems.slice(5).map((item) => ({ label: item.label, href: item.href }))
   return (
     <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F5F6FA' }}>
-      <MobileTopBar backButton={backButton} messagesHref={messagesHref} overflowItems={overflowItems} />
-      <BaseSidebar navItems={navItems} backButton={backButton} messagesHref={messagesHref} />
+      <MobileTopBar backButton={backButton} messagesHref={messagesHref} notificationsHref={notificationsHref} overflowItems={overflowItems} />
+      <BaseSidebar navItems={navItems} backButton={backButton} messagesHref={messagesHref} notificationsHref={notificationsHref} />
       <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">{children}</main>
       <BaseBottomNav navItems={navItems} />
     </div>

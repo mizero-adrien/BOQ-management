@@ -58,7 +58,7 @@ export default function Sidebar() {
         </div>
         <div className="flex items-center gap-1">
           <MessagesButton href="/messages" />
-          <NotificationBell unreadCount={unreadCount} />
+          <NotificationBell unreadCount={unreadCount} href="/notifications" />
         </div>
       </div>
       <div className="border-b" style={{ borderColor: '#EEEEEE' }} />

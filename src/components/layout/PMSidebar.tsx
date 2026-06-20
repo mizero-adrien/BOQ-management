@@ -17,7 +17,6 @@ const navItems = [
   { label: 'BOQ', href: '/pm/boq', icon: BOQIcon },
   { label: 'Procurement', href: '/procurement/dashboard', icon: ProcurementIcon },
   { label: 'Profile', href: '/pm/profile', icon: ProfileIcon },
-  { label: 'Notifications', href: '/pm/notifications', icon: BellNavIcon },
   { label: 'Settings', href: '/pm/settings', icon: SettingsIcon },
 ]
 
@@ -54,7 +53,7 @@ export default function PMSidebar() {
         </div>
         <div className="flex items-center gap-1">
           <MessagesButton href="/pm/messages" />
-          <NotificationBell unreadCount={unreadCount} />
+          <NotificationBell unreadCount={unreadCount} href="/pm/notifications" />
         </div>
       </div>
       <div className="border-b" style={{ borderColor: '#EEEEEE' }} />
@@ -199,15 +198,6 @@ function ProfileIcon({ active }: { active: boolean }) {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  )
-}
-
-function BellNavIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
   )
 }

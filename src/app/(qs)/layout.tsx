@@ -23,14 +23,13 @@ const navItems: NavItem[] = [
   { label: 'Cost Report', href: '/qs/costs', icon: (a) => icon(<><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></>, a) },
   { label: 'Variance', href: '/qs/variance', icon: (a) => icon(<><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></>, a) },
   { label: 'Me', href: '/qs/profile', icon: (a) => icon(<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>, a, true) },
-  { label: 'Notifications', href: '/qs/notifications', icon: (a) => icon(<><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>, a) },
 ]
 
 export default function QSLayout({ children }: { children: React.ReactNode }) {
   return (
     <PageErrorBoundary>
       <NotificationProvider>
-        <BaseLayout navItems={navItems} messagesHref="/qs/messages">{children}</BaseLayout>
+        <BaseLayout navItems={navItems} messagesHref="/qs/messages" notificationsHref="/qs/notifications">{children}</BaseLayout>
         <ToastContainer />
       </NotificationProvider>
     </PageErrorBoundary>
