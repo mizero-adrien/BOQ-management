@@ -42,31 +42,35 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
     let active = true
 
     async function load() {
-      const { data: rows } = await supabase
-        .from('direct_messages')
-        .select('id, project_id, sender_id, recipient_id, body, read_at, created_at')
-        .eq('project_id', projectId)
-        .or(
-          `and(sender_id.eq.${userId},recipient_id.eq.${partnerId}),and(sender_id.eq.${partnerId},recipient_id.eq.${userId})`
-        )
-        .order('created_at', { ascending: true })
+      try {
+        const { data: rows } = await supabase
+          .from('direct_messages')
+          .select('id, project_id, sender_id, recipient_id, body, read_at, created_at')
+          .eq('project_id', projectId)
+          .or(
+            `and(sender_id.eq.${userId},recipient_id.eq.${partnerId}),and(sender_id.eq.${partnerId},recipient_id.eq.${userId})`
+          )
+          .order('created_at', { ascending: true })
 
-      if (!active || !rows) { setLoading(false); return }
+        if (!active || !rows) { setLoading(false); return }
 
-      const ids = [...new Set([...rows.map((r) => r.sender_id), userId].filter(Boolean))]
-      if (ids.length) {
-        const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', ids)
-        profiles?.forEach((p) => cache.current.set(p.id, { full_name: p.full_name, role: p.role }))
-      }
+        const ids = [...new Set([...rows.map((r) => r.sender_id), userId].filter(Boolean))]
+        if (ids.length) {
+          const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', ids)
+          profiles?.forEach((p) => cache.current.set(p.id, { full_name: p.full_name, role: p.role }))
+        }
 
-      if (active) {
-        setMessages(rows.map((r) => ({ ...r, sender_name: cache.current.get(r.sender_id)?.full_name ?? 'Unknown' })))
-        setLoading(false)
-      }
+        if (active) {
+          setMessages(rows.map((r) => ({ ...r, sender_name: cache.current.get(r.sender_id)?.full_name ?? 'Unknown' })))
+          setLoading(false)
+        }
 
-      const unread = rows.filter((r) => r.recipient_id === userId && !r.read_at).map((r) => r.id)
-      if (unread.length) {
-        supabase.from('direct_messages').update({ read_at: new Date().toISOString() }).in('id', unread).then(() => {})
+        const unread = rows.filter((r) => r.recipient_id === userId && !r.read_at).map((r) => r.id)
+        if (unread.length) {
+          supabase.from('direct_messages').update({ read_at: new Date().toISOString() }).in('id', unread).then(() => {})
+        }
+      } catch {
+        if (active) setLoading(false)
       }
     }
 
@@ -83,16 +87,17 @@ export function useDirectMessages(projectId: string, partnerId: string, userId: 
             (row.sender_id === userId && row.recipient_id === partnerId) ||
             (row.sender_id === partnerId && row.recipient_id === userId)
           if (!involves) return
-          await ensureProfile(row.sender_id)
+          try {
+            await ensureProfile(row.sender_id)
+          } catch { /* profile fetch failure is non-fatal */ }
           const enriched = { ...row, sender_name: cache.current.get(row.sender_id)?.full_name ?? 'Unknown' }
-          // Deduplicate: send() already adds the message optimistically
           setMessages((prev) => prev.some((m) => m.id === enriched.id) ? prev : [...prev, enriched])
           if (row.recipient_id === userId) {
             supabase.from('direct_messages').update({ read_at: new Date().toISOString() }).eq('id', row.id).then(() => {})
           }
         }
       )
-      .subscribe()
+      .subscribe((status, err) => { if (err) console.warn('dm channel:', status, err) })
 
     return () => {
       active = false
@@ -135,41 +140,45 @@ export function useConversations(projectId: string, userId: string) {
     let active = true
 
     async function load() {
-      const { data: rows } = await supabase
-        .from('direct_messages')
-        .select('sender_id, recipient_id, body, read_at, created_at')
-        .eq('project_id', projectId)
-        .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
-        .order('created_at', { ascending: false })
+      try {
+        const { data: rows } = await supabase
+          .from('direct_messages')
+          .select('sender_id, recipient_id, body, read_at, created_at')
+          .eq('project_id', projectId)
+          .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
+          .order('created_at', { ascending: false })
 
-      if (!active || !rows) { setLoading(false); return }
+        if (!active || !rows) { setLoading(false); return }
 
-      const partnerMap = new Map<string, { last_message: string; last_message_at: string; unread_count: number }>()
-      for (const r of rows) {
-        const pid = r.sender_id === userId ? r.recipient_id : r.sender_id
-        if (!partnerMap.has(pid)) {
-          partnerMap.set(pid, { last_message: r.body, last_message_at: r.created_at, unread_count: 0 })
+        const partnerMap = new Map<string, { last_message: string; last_message_at: string; unread_count: number }>()
+        for (const r of rows) {
+          const pid = r.sender_id === userId ? r.recipient_id : r.sender_id
+          if (!partnerMap.has(pid)) {
+            partnerMap.set(pid, { last_message: r.body, last_message_at: r.created_at, unread_count: 0 })
+          }
+          if (r.recipient_id === userId && !r.read_at) {
+            const cur = partnerMap.get(pid)!
+            partnerMap.set(pid, { ...cur, unread_count: cur.unread_count + 1 })
+          }
         }
-        if (r.recipient_id === userId && !r.read_at) {
-          const cur = partnerMap.get(pid)!
-          partnerMap.set(pid, { ...cur, unread_count: cur.unread_count + 1 })
-        }
+
+        if (partnerMap.size === 0) { if (active) { setConversations([]); setLoading(false) } return }
+
+        const pids = [...partnerMap.keys()]
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', pids)
+
+        const convs: Conversation[] = pids
+          .map((pid) => {
+            const p = profiles?.find((x) => x.id === pid)
+            const info = partnerMap.get(pid)!
+            return { partner_id: pid, partner_name: p?.full_name ?? 'Unknown', partner_role: p?.role ?? '', ...info }
+          })
+          .sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime())
+
+        if (active) { setConversations(convs); setLoading(false) }
+      } catch {
+        if (active) { setConversations([]); setLoading(false) }
       }
-
-      if (partnerMap.size === 0) { if (active) { setConversations([]); setLoading(false) } return }
-
-      const pids = [...partnerMap.keys()]
-      const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', pids)
-
-      const convs: Conversation[] = pids
-        .map((pid) => {
-          const p = profiles?.find((x) => x.id === pid)
-          const info = partnerMap.get(pid)!
-          return { partner_id: pid, partner_name: p?.full_name ?? 'Unknown', partner_role: p?.role ?? '', ...info }
-        })
-        .sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime())
-
-      if (active) { setConversations(convs); setLoading(false) }
     }
 
     load()
@@ -184,7 +193,7 @@ export function useConversations(projectId: string, userId: string) {
           if (r.sender_id === userId || r.recipient_id === userId) load()
         }
       )
-      .subscribe()
+      .subscribe((status, err) => { if (err) console.warn('convs channel:', status, err) })
 
     return () => {
       active = false

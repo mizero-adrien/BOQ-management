@@ -40,21 +40,24 @@ export function useProjectMessages(projectId: string, userId: string) {
     let active = true
 
     async function load() {
-      const { data: rows } = await supabase
-        .from('project_messages')
-        .select('id, project_id, sender_id, body, created_at')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: true })
+      try {
+        const { data: rows } = await supabase
+          .from('project_messages')
+          .select('id, project_id, sender_id, body, created_at')
+          .eq('project_id', projectId)
+          .order('created_at', { ascending: true })
 
-      if (!active || !rows) { setLoading(false); return }
+        if (!active || !rows) { setLoading(false); return }
 
-      // Pre-load current user's profile so own sent messages hydrate correctly
-      const ids = [...new Set([...rows.map((r) => r.sender_id), userId].filter(Boolean))]
-      if (ids.length) {
-        const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', ids)
-        profiles?.forEach((p) => cache.current.set(p.id, { full_name: p.full_name, role: p.role }))
+        const ids = [...new Set([...rows.map((r) => r.sender_id), userId].filter(Boolean))]
+        if (ids.length) {
+          const { data: profiles } = await supabase.from('profiles').select('id, full_name, role').in('id', ids)
+          profiles?.forEach((p) => cache.current.set(p.id, { full_name: p.full_name, role: p.role }))
+        }
+        if (active) { setMessages(rows.map(hydrate)); setLoading(false) }
+      } catch {
+        if (active) setLoading(false)
       }
-      if (active) { setMessages(rows.map(hydrate)); setLoading(false) }
     }
 
     load()
@@ -66,12 +69,13 @@ export function useProjectMessages(projectId: string, userId: string) {
         { event: 'INSERT', schema: 'public', table: 'project_messages', filter: `project_id=eq.${projectId}` },
         async (payload) => {
           const row = payload.new as { id: string; project_id: string; sender_id: string; body: string; created_at: string }
-          await ensureProfile(row.sender_id)
-          // Deduplicate: send() already adds the message optimistically
+          try {
+            await ensureProfile(row.sender_id)
+          } catch { /* profile fetch failure is non-fatal */ }
           setMessages((prev) => prev.some((m) => m.id === row.id) ? prev : [...prev, hydrate(row)])
         }
       )
-      .subscribe()
+      .subscribe((status, err) => { if (err) console.warn('project-messages channel:', status, err) })
 
     return () => {
       active = false
