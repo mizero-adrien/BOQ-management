@@ -19,7 +19,7 @@ const loginSchema = z.object({
   password: z
     .string()
     .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(8, 'Password must be at least 8 characters'),
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
@@ -234,7 +234,7 @@ function LoginForm() {
       </form>
 
       <p className="text-center text-sm text-gray-500 mt-6">
-        Do not have an account?{' '}
+        Don&apos;t have an account?{' '}
         <Link
           href="/signup"
           className="font-semibold"

@@ -6,7 +6,7 @@ export function getRedirectPath(role: string, projectId?: string): string {
     case 'qs': return '/qs/dashboard'
     case 'storekeeper': return '/storekeeper/dashboard'
     case 'procurement': return '/procurement/dashboard'
-    case 'owner': return projectId ? `/owner/${projectId}` : '/dashboard'
+    case 'owner': return projectId ? `/owner/${projectId}` : '/redirect'
     default: return '/dashboard'
   }
 }

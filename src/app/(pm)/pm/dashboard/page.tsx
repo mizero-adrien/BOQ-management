@@ -8,13 +8,11 @@ import { useRouter } from 'next/navigation'
 import { usePMProjects } from '@/hooks/usePMProjects'
 import { useTodayReports } from '@/hooks/useTodayReports'
 import { usePMStats } from '@/hooks/usePMStats'
-import { useNotifications } from '@/hooks/useNotifications'
 import { formatDate } from '@/lib/utils'
 import StatCard from '@/components/pm/StatCard'
 import ProjectCard from '@/components/pm/ProjectCard'
 import ReportRow from '@/components/pm/ReportRow'
 import IssueItem from '@/components/pm/IssueItem'
-import NotificationBell from '@/components/shared/NotificationBell'
 import MobileProfileCard from '@/components/pm/MobileProfileCard'
 import { EmptyCard, SearchIcon, InfoIcon, XSmallIcon } from '@/components/shared/DashboardUtils'
 import { SkeletonStats, SkeletonCard, SkeletonTable } from '@/components/shared/Skeleton'
@@ -24,7 +22,6 @@ export default function PMDashboardPage() {
   const { projects, loading: projectsLoading } = usePMProjects()
   const { reports, totalEngineers, loading: reportsLoading } = useTodayReports(projects)
   const stats = usePMStats(projects, reports, totalEngineers)
-  const { unreadCount } = useNotifications()
   const [search, setSearch] = useState('')
   const [demoBannerDismissed, setDemoBannerDismissed] = useState(false)
   const router = useRouter()
@@ -79,9 +76,6 @@ export default function PMDashboardPage() {
           <p className="text-sm" style={{ color: '#666666' }}>{today}</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0 mt-0.5">
-          <span className="hidden md:block">
-            <NotificationBell unreadCount={unreadCount} />
-          </span>
           <Link
             href="/pm/team"
             className="px-4 py-2 rounded-lg text-sm font-medium"
@@ -100,6 +94,7 @@ export default function PMDashboardPage() {
         <input
           type="text"
           placeholder="Search projects or engineers..."
+          aria-label="Search projects and engineers"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl outline-none"

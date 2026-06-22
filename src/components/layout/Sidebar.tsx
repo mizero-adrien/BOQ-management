@@ -11,6 +11,7 @@ import MessagesButton from '@/components/shared/MessagesButton'
 const navItems = [
   { label: 'Home', href: '/dashboard', icon: HomeIcon },
   { label: 'Report', href: '/report/new', icon: ReportIcon },
+  { label: 'History', href: '/report/history', icon: HistoryIcon },
   { label: 'BOQ', href: '/boq', icon: BOQIcon },
   { label: 'Tasks', href: '/tasks', icon: TasksIcon },
   { label: 'Me', href: '/profile', icon: ProfileIcon },
@@ -185,6 +186,15 @@ function BOQIcon({ active }: { active: boolean }) {
       <line x1="7" y1="8" x2="7" y2="12" />
       <line x1="12" y1="6" x2="12" y2="12" />
       <line x1="17" y1="10" x2="17" y2="12" />
+    </svg>
+  )
+}
+
+function HistoryIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
     </svg>
   )
 }

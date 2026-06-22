@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { Company } from '@/types/database'
 import { toast } from '@/lib/toast'
@@ -79,11 +80,11 @@ export default function SettingsPage() {
             <p className="text-sm mb-4" style={{ color: '#666666' }}>
               Your account is not linked to a company. Complete onboarding to set up your company.
             </p>
-            <a href="/onboarding"
+            <Link href="/onboarding"
               className="inline-block px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
               style={{ backgroundColor: '#00236F' }}>
               Go to onboarding
-            </a>
+            </Link>
           </div>
         </div>
       </div>

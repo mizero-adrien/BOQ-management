@@ -54,7 +54,7 @@ export default function ProcurementLayout({ children }: { children: React.ReactN
   return (
     <PageErrorBoundary>
       <NotificationProvider>
-        <BaseLayout navItems={navItems} backButton={true} messagesHref="/procurement/messages">{children}</BaseLayout>
+        <BaseLayout navItems={navItems} backButton={true} messagesHref="/procurement/messages" notificationsHref="/procurement/notifications">{children}</BaseLayout>
         <ToastContainer />
       </NotificationProvider>
     </PageErrorBoundary>

@@ -61,32 +61,21 @@ export default function StockInPage() {
       const supabase = createClient()
 
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        console.error('[stock-in] no authenticated user')
-        setLoadingProject(false)
-        return
-      }
+      if (!user) { setLoadingProject(false); return }
 
-      console.log('[stock-in] user id:', user.id)
-
-      // Step 1 — find which projects this user is a member of
       const { data: memberData, error: memberError } = await supabase
         .from('project_members')
         .select('project_id')
         .eq('user_id', user.id)
         .limit(10)
 
-      console.log('[stock-in] memberships:', memberData, 'error:', memberError)
-
       if (memberError || !memberData || memberData.length === 0) {
-        console.error('[stock-in] no project memberships found')
         setLoadingProject(false)
         return
       }
 
       const projectIds = memberData.map((m: { project_id: string }) => m.project_id)
 
-      // Step 2 — find the active project from those memberships
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select('id, name, pm_id')
@@ -95,10 +84,7 @@ export default function StockInPage() {
         .limit(1)
         .single()
 
-      console.log('[stock-in] project:', projectData, 'error:', projectError)
-
       if (projectError || !projectData) {
-        console.error('[stock-in] no active project found')
         setLoadingProject(false)
         return
       }
@@ -107,17 +93,13 @@ export default function StockInPage() {
       setLoadingProject(false)
       setLoadingItems(true)
 
-      // Step 3 — fetch BOQ sections for the project
       const { data: sectionsData, error: sectionsError } = await supabase
         .from('boq_sections')
         .select('id, title')
         .eq('project_id', projectData.id)
         .order('order_index', { ascending: true })
 
-      console.log('[stock-in] sections:', sectionsData, 'error:', sectionsError)
-
       if (sectionsError || !sectionsData || sectionsData.length === 0) {
-        console.error('[stock-in] no BOQ sections found')
         setLoadingItems(false)
         return
       }
@@ -127,17 +109,13 @@ export default function StockInPage() {
         sectionsData.map((s: { id: string; title: string }) => [s.id, s.title])
       )
 
-      // Step 4 — fetch BOQ items within those sections
       const { data: itemsData, error: itemsError } = await supabase
         .from('boq_items')
         .select('id, description, unit, quantity, used_quantity, section_id')
         .in('section_id', sectionIds)
         .order('description', { ascending: true })
 
-      console.log('[stock-in] items:', itemsData, 'error:', itemsError)
-
       if (itemsError || !itemsData) {
-        console.error('[stock-in] items error:', itemsError?.message)
         setLoadingItems(false)
         return
       }
@@ -158,7 +136,6 @@ export default function StockInPage() {
         section_title: sectionMap[item.section_id] ?? 'Unknown section',
       }))
 
-      console.log('[stock-in] built', items.length, 'items')
       setBOQItems(items)
       setLoadingItems(false)
     }
@@ -198,8 +175,7 @@ export default function StockInPage() {
       setSupplierName('')
       setDeliveryNote('')
       setNotes('')
-    } catch (err) {
-      console.error('[stock-in] submit error:', err)
+    } catch {
       toast.error('Unexpected error', 'An unexpected error occurred. Please try again.')
     } finally {
       setSubmitting(false)

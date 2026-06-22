@@ -70,32 +70,21 @@ export default function StockOutPage() {
       const supabase = createClient()
 
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        console.error('[stock-out] no authenticated user')
-        setLoadingProject(false)
-        return
-      }
+      if (!user) { setLoadingProject(false); return }
 
-      console.log('[stock-out] user id:', user.id)
-
-      // Step 1 — find which projects this user is a member of
       const { data: memberData, error: memberError } = await supabase
         .from('project_members')
         .select('project_id')
         .eq('user_id', user.id)
         .limit(10)
 
-      console.log('[stock-out] memberships:', memberData, 'error:', memberError)
-
       if (memberError || !memberData || memberData.length === 0) {
-        console.error('[stock-out] no project memberships found')
         setLoadingProject(false)
         return
       }
 
       const projectIds = memberData.map((m: { project_id: string }) => m.project_id)
 
-      // Step 2 — find the active project
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select('id, name, pm_id')
@@ -104,10 +93,7 @@ export default function StockOutPage() {
         .limit(1)
         .single()
 
-      console.log('[stock-out] project:', projectData, 'error:', projectError)
-
       if (projectError || !projectData) {
-        console.error('[stock-out] no active project found')
         setLoadingProject(false)
         return
       }
@@ -116,18 +102,11 @@ export default function StockOutPage() {
       setLoadingProject(false)
       setLoadingItems(true)
 
-      // Step 3 — fetch BOQ sections
-      const { data: sectionsData, error: sectionsError } = await supabase
+      const { data: sectionsData } = await supabase
         .from('boq_sections')
         .select('id, title')
         .eq('project_id', projectData.id)
         .order('order_index', { ascending: true })
-
-      console.log('[stock-out] sections:', sectionsData, 'error:', sectionsError)
-
-      if (sectionsError) {
-        console.error('[stock-out] sections fetch error:', sectionsError.message)
-      }
 
       const sections = sectionsData ?? []
 
@@ -137,18 +116,11 @@ export default function StockOutPage() {
           sections.map((s: { id: string; title: string }) => [s.id, s.title])
         )
 
-        // Step 4 — fetch BOQ items
-        const { data: itemsData, error: itemsError } = await supabase
+        const { data: itemsData } = await supabase
           .from('boq_items')
           .select('id, description, unit, quantity, used_quantity, section_id')
           .in('section_id', sectionIds)
           .order('description', { ascending: true })
-
-        console.log('[stock-out] items:', itemsData, 'error:', itemsError)
-
-        if (itemsError) {
-          console.error('[stock-out] items fetch error:', itemsError.message)
-        }
 
         const items: BOQItemOption[] = (itemsData ?? []).map((item: {
           id: string
@@ -166,25 +138,17 @@ export default function StockOutPage() {
           section_title: sectionMap[item.section_id] ?? 'Unknown section',
         }))
 
-        console.log('[stock-out] built', items.length, 'items')
         setBOQItems(items)
         if (items.length > 0) setSelectedItemId(items[0].id)
       }
 
       setLoadingItems(false)
 
-      // Step 5 — fetch all project members with profiles joined
-      const { data: memberRows, error: membersError } = await supabase
+      const { data: memberRows } = await supabase
         .from('project_members')
         .select('user_id, role, profiles(full_name)')
         .eq('project_id', projectData.id)
         .in('role', ['engineer', 'foreman', 'storekeeper', 'pm', 'qs'])
-
-      console.log('[stock-out] team members:', memberRows, 'error:', membersError)
-
-      if (membersError) {
-        console.error('[stock-out] members fetch error:', membersError.message)
-      }
 
       const teamMembers: MemberOption[] = (memberRows ?? []).map((m: {
         user_id: string
@@ -199,7 +163,6 @@ export default function StockOutPage() {
         }
       })
 
-      console.log('[stock-out] team members built:', teamMembers.length)
       setMembers(teamMembers)
     }
 
@@ -241,7 +204,6 @@ export default function StockOutPage() {
           cost_rwf: 0,
         })
         if (retryError) {
-          console.error('[stock-out] material_logs insert error:', retryError.message)
           toast.error('Failed to record issuance', 'Please try again.')
           setSubmitting(false)
           return
@@ -283,8 +245,7 @@ export default function StockOutPage() {
 
       toast.success('Issuance recorded', 'BOQ updated automatically')
       router.push('/storekeeper/dashboard')
-    } catch (err) {
-      console.error('[stock-out] submit error:', err)
+    } catch {
       toast.error('Unexpected error', 'An unexpected error occurred. Please try again.')
       setSubmitting(false)
     }
@@ -371,7 +332,19 @@ export default function StockOutPage() {
               >
                 −
               </button>
-              <span style={{ fontSize: '24px', fontWeight: '700', color: '#00236F', minWidth: '48px', textAlign: 'center' }}>{qty}</span>
+              <input
+                type="number"
+                min="1"
+                step="0.001"
+                value={qty}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value)
+                  if (!isNaN(v) && v > 0) setQty(v)
+                }}
+                style={{ ...fieldStyle, textAlign: 'center', fontSize: '20px', fontWeight: '700', color: '#00236F', width: '96px', flexShrink: 0 }}
+                onFocus={(e) => { e.target.style.border = '1.5px solid #00236F' }}
+                onBlur={(e) => { e.target.style.border = '1px solid #EEEEEE' }}
+              />
               <button
                 type="button"
                 onClick={() => setQty((q) => q + 1)}

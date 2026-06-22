@@ -70,13 +70,7 @@ export default function InventoryPage() {
       const supabase = createClient()
 
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        console.error('[inventory] no authenticated user')
-        setLoading(false)
-        return
-      }
-
-      console.log('[inventory] user id:', user.id)
+      if (!user) { setLoading(false); return }
 
       const { data: memberData, error: memberError } = await supabase
         .from('project_members')
@@ -84,10 +78,7 @@ export default function InventoryPage() {
         .eq('user_id', user.id)
         .limit(10)
 
-      console.log('[inventory] memberships:', memberData, 'error:', memberError)
-
       if (memberError || !memberData || memberData.length === 0) {
-        console.error('[inventory] no project memberships found')
         setLoading(false)
         return
       }
@@ -102,44 +93,29 @@ export default function InventoryPage() {
         .limit(1)
         .single()
 
-      console.log('[inventory] project:', projectData, 'error:', projectError)
-
       if (projectError || !projectData) {
-        console.error('[inventory] no active project found')
         setLoading(false)
         return
       }
 
       setProject(projectData as Project)
 
-      const { data: sectionsData, error: sectionsError } = await supabase
+      const { data: sectionsData } = await supabase
         .from('boq_sections')
         .select('id, title')
         .eq('project_id', projectData.id)
         .order('order_index', { ascending: true })
-
-      console.log('[inventory] sections:', sectionsData, 'error:', sectionsError)
-
-      if (sectionsError) {
-        console.error('[inventory] sections fetch error:', sectionsError.message)
-      }
 
       const rawSections = sectionsData ?? []
 
       if (rawSections.length > 0) {
         const sectionIds = rawSections.map((s: { id: string }) => s.id)
 
-        const { data: itemsData, error: itemsError } = await supabase
+        const { data: itemsData } = await supabase
           .from('boq_items')
           .select('id, description, unit, quantity, used_quantity, section_id')
           .in('section_id', sectionIds)
           .order('description', { ascending: true })
-
-        console.log('[inventory] items:', itemsData, 'error:', itemsError)
-
-        if (itemsError) {
-          console.error('[inventory] items fetch error:', itemsError.message)
-        }
 
         const itemsBySectionId: Record<string, InventoryItem[]> = {}
         for (const item of (itemsData ?? []) as (InventoryItem & { section_id: string })[]) {
@@ -159,7 +135,6 @@ export default function InventoryPage() {
           items: itemsBySectionId[s.id] ?? [],
         }))
 
-        console.log('[inventory] built', built.length, 'sections')
         setSections(built)
       }
 

@@ -34,13 +34,7 @@ export default function StorekeeperDashboardPage() {
       const supabase = createClient()
 
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        console.error('[dashboard] no authenticated user')
-        setLoadingProject(false)
-        return
-      }
-
-      console.log('[dashboard] user id:', user.id)
+      if (!user) { setLoadingProject(false); return }
 
       const { data: memberData, error: memberError } = await supabase
         .from('project_members')
@@ -48,10 +42,7 @@ export default function StorekeeperDashboardPage() {
         .eq('user_id', user.id)
         .limit(10)
 
-      console.log('[dashboard] memberships:', memberData, 'error:', memberError)
-
       if (memberError || !memberData || memberData.length === 0) {
-        console.error('[dashboard] no project memberships found')
         setLoadingProject(false)
         return
       }
@@ -66,17 +57,13 @@ export default function StorekeeperDashboardPage() {
         .limit(1)
         .single()
 
-      console.log('[dashboard] project:', projectData, 'error:', projectError)
-
       if (projectError || !projectData) {
-        console.error('[dashboard] no active project found')
         setLoadingProject(false)
         return
       }
 
       setProject(projectData as Project)
 
-      // Fetch BOQ items to compute low stock alerts
       const { data: sectionsData } = await supabase
         .from('boq_sections')
         .select('id')
@@ -103,7 +90,6 @@ export default function StorekeeperDashboardPage() {
               used_quantity: item.used_quantity,
               usage: Math.round((item.used_quantity / item.quantity) * 100),
             }))
-          console.log('[dashboard] low stock items:', low.length)
           setLowStockItems(low)
         }
       }
