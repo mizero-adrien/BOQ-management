@@ -6,6 +6,7 @@ import { use, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils/index'
 import type { BOQItem, BOQSection } from '@/types/database'
+import { Skeleton, SkeletonCard } from '@/components/shared/Skeleton'
 
 export default function QSSectionDetailPage({ params }: { params: Promise<{ sectionId: string }> }) {
   const { sectionId } = use(params)
@@ -26,9 +27,14 @@ export default function QSSectionDetailPage({ params }: { params: Promise<{ sect
   }, [sectionId])
 
   if (loading) {
-    return <div className="animate-pulse px-4 py-5 space-y-3">
-      {[1,2,3].map(i => <div key={i} className="h-14 rounded-xl" style={{ backgroundColor: '#EEEEEE' }} />)}
-    </div>
+    return (
+      <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <Skeleton width="40%" height="22px" borderRadius="8px" className="mb-2" />
+        <Skeleton width="25%" height="14px" borderRadius="6px" className="mb-3" />
+        <Skeleton width="100%" height="6px" borderRadius="99px" className="mb-6" />
+        <SkeletonCard height="220px" />
+      </div>
+    )
   }
 
   const totalBudget = items.reduce((s, i) => s + Number(i.budgeted_total), 0)

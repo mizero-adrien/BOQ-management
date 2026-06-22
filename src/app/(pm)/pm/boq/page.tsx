@@ -66,13 +66,16 @@ export default function PMBOQPage() {
     return id
   }
 
-  async function handleImport(parsedSections: ParsedBOQSection[]) {
+  async function handleImport(parsedSections: ParsedBOQSection[], onProgress: (done: number, total: number) => void) {
     if (!selectedProjectId) return
-    for (const sec of parsedSections) {
+    for (let i = 0; i < parsedSections.length; i++) {
+      onProgress(i, parsedSections.length)
+      const sec = parsedSections[i]
       const sectionId = await addSection(sec.title, selectedProjectId)
       if (sectionId && sec.items.length > 0) {
-        await bulkAddItems(sectionId, sec.items.map((item, i) => ({ ...item, order_index: i + 1 })))
+        await bulkAddItems(sectionId, sec.items.map((item, idx) => ({ ...item, order_index: idx + 1 })))
       }
+      onProgress(i + 1, parsedSections.length)
     }
     setShowImport(false)
   }

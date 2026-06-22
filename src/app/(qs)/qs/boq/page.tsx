@@ -8,6 +8,7 @@ import { useBOQSections } from '@/hooks/useBOQSections'
 import { formatCurrency } from '@/lib/utils/index'
 import { createClient } from '@/lib/supabase/client'
 import type { BOQItemView } from '@/types/database'
+import { SkeletonCard, SkeletonStats } from '@/components/shared/Skeleton'
 
 function EditRow({ item, onSave }: { item: BOQItemView; onSave: (id: string, rate: number, qty: number) => void }) {
   const [editing, setEditing] = useState(false)
@@ -74,9 +75,12 @@ export default function QSBOQPage() {
   }
 
   if (loading) {
-    return <div className="animate-pulse px-4 py-5 space-y-3">
-      {[1,2,3].map(i => <div key={i} className="h-24 rounded-xl" style={{ backgroundColor: '#EEEEEE' }} />)}
-    </div>
+    return (
+      <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <SkeletonStats count={2} />
+        {[1, 2, 3].map((i) => <SkeletonCard key={i} height="120px" />)}
+      </div>
+    )
   }
 
   return (

@@ -12,13 +12,26 @@ export interface ParsedBOQSection {
   items: ParsedBOQRow[]
 }
 
-const DESC  = ['description', 'item description', 'work item', 'description of works', 'works', 'activity', 'particulars', 'details']
-const UNIT  = ['unit', 'units', 'u/m', 'u.m.', 'unit of measure']
-const QTY   = ['quantity', 'qty', 'no.', 'nos', 'number', 'volume', 'qty.']
-const RATE  = ['unit rate', 'unit price', 'rate', 'price', 'cost per unit']
-const SKIP  = ['amount', 'total', 'subtotal', 'sum', 'extended', 'rwf amount', 'total amount']
+export interface ColumnMap {
+  headerRowIdx: number
+  desc: number
+  unit: number
+  qty: number
+  rate: number
+}
 
-function norm(v: unknown): string { return String(v ?? '').toLowerCase().trim() }
+export interface RawHeaderCandidate {
+  rowIdx: number
+  headers: string[]
+}
+
+const DESC  = ['description', 'item description', 'work item', 'description of works', 'works', 'activity', 'particulars', 'details', 'item', 'work description', 'scope', 'scope of works', 'trade', 'element', 'labour description', 'material description', 'desc']
+const UNIT  = ['unit', 'units', 'u/m', 'u.m.', 'unit of measure', 'uom', 'measure']
+const QTY   = ['quantity', 'qty', 'no.', 'nos', 'number', 'volume', 'qty.', 'count', 'q\'ty', 'quant']
+const RATE  = ['unit rate', 'unit price', 'rate', 'price', 'cost per unit', 'rate (rwf)', 'unit cost', 'p/unit', 'rate/unit', 'labour rate', 'material rate']
+const SKIP  = ['amount', 'total', 'subtotal', 'sum', 'extended', 'rwf amount', 'total amount', 'line total', 'ext price']
+
+function norm(v: unknown): string { return String(v ?? '').toLowerCase().replace(/[^a-z0-9 ./]/g, '').trim() }
 function matches(h: string, list: string[]): boolean { return list.some((l) => h === l || h.startsWith(l + ' ') || h.endsWith(' ' + l) || h.includes(l)) }
 function toNum(v: unknown): number {
   if (typeof v === 'number') return v
@@ -26,40 +39,42 @@ function toNum(v: unknown): number {
   return isNaN(n) || n < 0 ? 0 : n
 }
 
-function detectHeader(rows: unknown[][]): { rowIdx: number; desc: number; unit: number; qty: number; rate: number } | null {
-  for (let i = 0; i < Math.min(rows.length, 12); i++) {
+function detectHeader(rows: unknown[][]): ColumnMap | null {
+  for (let i = 0; i < Math.min(rows.length, 30); i++) {
     const row = rows[i]
     let d = -1, u = -1, q = -1, r = -1
     row.forEach((cell, j) => {
       const h = norm(cell)
+      if (!h) return
       if (d === -1 && matches(h, DESC) && !matches(h, SKIP)) d = j
       else if (u === -1 && matches(h, UNIT)) u = j
       else if (q === -1 && matches(h, QTY)) q = j
       else if (r === -1 && matches(h, RATE) && !matches(h, SKIP)) r = j
     })
-    if (d !== -1 && (q !== -1 || r !== -1)) return { rowIdx: i, desc: d, unit: u, qty: q, rate: r }
+    if (d !== -1 && (q !== -1 || r !== -1)) return { headerRowIdx: i, desc: d, unit: u, qty: q, rate: r }
   }
   return null
 }
 
-export async function parseExcel(file: File): Promise<ParsedBOQSection[]> {
-  const buffer = await file.arrayBuffer()
-  const wb = XLSX.read(buffer, { type: 'array' })
-  const sheetName = wb.SheetNames[0]
-  const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[sheetName], { header: 1, defval: '' })
+function readRows(file: File | ArrayBuffer): Promise<{ sheetName: string; rows: unknown[][] }> {
+  return new Promise((resolve) => {
+    const process = (buffer: ArrayBuffer) => {
+      const wb = XLSX.read(buffer, { type: 'array' })
+      const sheetName = wb.SheetNames[0]
+      const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[sheetName], { header: 1, defval: '' })
+      resolve({ sheetName, rows })
+    }
+    if (file instanceof ArrayBuffer) { process(file); return }
+    file.arrayBuffer().then(process)
+  })
+}
 
-  const header = detectHeader(rows)
-  if (!header) {
-    throw new Error(
-      'Could not detect BOQ columns. Ensure your spreadsheet has column headers for Description, Quantity, and Unit Rate.'
-    )
-  }
-
-  const { rowIdx, desc: dCol, unit: uCol, qty: qCol, rate: rCol } = header
+function buildSections(rows: unknown[][], map: ColumnMap, sheetName: string): ParsedBOQSection[] {
+  const { headerRowIdx, desc: dCol, unit: uCol, qty: qCol, rate: rCol } = map
   const sections: ParsedBOQSection[] = []
   let current: ParsedBOQSection = { title: sheetName, items: [] }
 
-  for (let i = rowIdx + 1; i < rows.length; i++) {
+  for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const row = rows[i]
     const descVal = String(row[dCol] ?? '').trim()
     if (!descVal) continue
@@ -84,6 +99,39 @@ export async function parseExcel(file: File): Promise<ParsedBOQSection[]> {
   }
 
   if (current.items.length > 0) sections.push(current)
+  return sections
+}
+
+export async function getCandidateHeaders(file: File): Promise<RawHeaderCandidate[]> {
+  const { rows } = await readRows(file)
+  const candidates: RawHeaderCandidate[] = []
+  for (let i = 0; i < Math.min(rows.length, 30); i++) {
+    const headers = rows[i].map((c) => String(c ?? '').trim()).filter(Boolean)
+    if (headers.length >= 2) candidates.push({ rowIdx: i, headers: rows[i].map((c) => String(c ?? '').trim()) })
+  }
+  return candidates
+}
+
+export async function parseExcelWithMap(file: File, map: ColumnMap): Promise<ParsedBOQSection[]> {
+  const { sheetName, rows } = await readRows(file)
+  const sections = buildSections(rows, map, sheetName)
+  if (sections.length === 0) {
+    throw new Error('No valid BOQ items found. Make sure rows have non-zero Quantity or Unit Rate values.')
+  }
+  return sections
+}
+
+export async function parseExcel(file: File): Promise<ParsedBOQSection[]> {
+  const { sheetName, rows } = await readRows(file)
+
+  const header = detectHeader(rows)
+  if (!header) {
+    throw new Error(
+      'Could not detect BOQ columns. Ensure your spreadsheet has column headers for Description, Quantity, and Unit Rate.'
+    )
+  }
+
+  const sections = buildSections(rows, header, sheetName)
   if (sections.length === 0) {
     throw new Error('No valid BOQ items found. Make sure rows have non-zero Quantity or Unit Rate values.')
   }

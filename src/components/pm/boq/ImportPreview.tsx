@@ -4,9 +4,11 @@ import { useState } from 'react'
 import type { ParsedBOQSection } from '@/lib/boq/parseExcel'
 import { formatCurrency } from '@/lib/utils'
 
+type ProgressCallback = (done: number, total: number) => void
+
 interface Props {
   sections: ParsedBOQSection[]
-  onImport: (sections: ParsedBOQSection[]) => Promise<void>
+  onImport: (sections: ParsedBOQSection[], onProgress: ProgressCallback) => Promise<void>
   onBack: () => void
 }
 
@@ -14,6 +16,7 @@ export default function ImportPreview({ sections: initial, onImport, onBack }: P
   const [sections, setSections] = useState<ParsedBOQSection[]>(initial)
   const [expanded, setExpanded] = useState<Record<number, boolean>>({ 0: true })
   const [importing, setImporting] = useState(false)
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
 
   function renameSection(idx: number, title: string) {
     setSections((prev) => prev.map((s, i) => i === idx ? { ...s, title } : s))
@@ -34,8 +37,10 @@ export default function ImportPreview({ sections: initial, onImport, onBack }: P
 
   async function handleImport() {
     setImporting(true)
-    await onImport(validSections)
+    setProgress({ done: 0, total: validSections.length })
+    await onImport(validSections, (done, total) => setProgress({ done, total }))
     setImporting(false)
+    setProgress(null)
   }
 
   if (sections.length === 0) {
@@ -108,10 +113,35 @@ export default function ImportPreview({ sections: initial, onImport, onBack }: P
         ))}
       </div>
 
+      {importing && progress && (
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs" style={{ color: '#666666' }}>
+              Importing section {progress.done} of {progress.total}…
+            </span>
+            <span className="text-xs font-semibold" style={{ color: '#00236F' }}>
+              {progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0}%
+            </span>
+          </div>
+          <div className="rounded-full overflow-hidden" style={{ height: '4px', backgroundColor: '#EEEEEE' }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${progress.total > 0 ? (progress.done / progress.total) * 100 : 0}%`, backgroundColor: '#00236F' }}
+            />
+          </div>
+        </div>
+      )}
+
       <button type="button" onClick={handleImport} disabled={importing || validSections.length === 0}
-        className="w-full py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+        className="w-full py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2"
         style={{ backgroundColor: '#00236F' }}>
-        {importing ? 'Importing...' : `Import ${validSections.length} section${validSections.length !== 1 ? 's' : ''} (${totalItems} items)`}
+        {importing && (
+          <span className="inline-block w-4 h-4 border-2 rounded-full animate-spin flex-shrink-0"
+            style={{ borderColor: 'rgba(255,255,255,0.4)', borderTopColor: '#FFFFFF' }} />
+        )}
+        {importing
+          ? 'Importing…'
+          : `Import ${validSections.length} section${validSections.length !== 1 ? 's' : ''} (${totalItems} items)`}
       </button>
     </div>
   )
