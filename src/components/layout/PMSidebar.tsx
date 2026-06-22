@@ -15,7 +15,7 @@ const navItems = [
   { label: 'Projects', href: '/pm/projects', icon: ProjectsIcon },
   { label: 'Team', href: '/pm/team', icon: TeamIcon },
   { label: 'BOQ', href: '/pm/boq', icon: BOQIcon },
-  { label: 'Procurement', href: '/procurement/dashboard', icon: ProcurementIcon },
+  { label: 'Procurement', href: '/pm/procurement', icon: ProcurementIcon },
   { label: 'Profile', href: '/pm/profile', icon: ProfileIcon },
   { label: 'Settings', href: '/pm/settings', icon: SettingsIcon },
 ]

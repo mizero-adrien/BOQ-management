@@ -7,7 +7,7 @@ import ToastContainer from '@/components/shared/ToastContainer'
 
 const pmOverflowItems = [
   { label: 'Projects', href: '/pm/projects' },
-  { label: 'Procurement', href: '/procurement/dashboard' },
+  { label: 'Procurement', href: '/pm/procurement' },
   { label: 'Profile', href: '/pm/profile' },
   { label: 'Settings', href: '/pm/settings' },
 ]
