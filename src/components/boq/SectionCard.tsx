@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import BudgetProgressBar from './BudgetProgressBar'
+import BudgetProgressBar, { progressColor } from './BudgetProgressBar'
 import { formatCurrency } from '@/lib/utils'
 import type { SectionWithItems } from '@/hooks/useBOQSections'
 
@@ -69,12 +69,13 @@ export default function SectionCard({ section }: { section: SectionWithItems }) 
         <BudgetProgressBar used={section.total_used} total={section.total_budgeted} />
       ) : (
         <div className="rounded-full overflow-hidden" style={{ height: '6px', backgroundColor: '#EEEEEE' }}>
-          <div className="h-full rounded-full" style={{ width: `${Math.min(100, qtyPct)}%`, backgroundColor: '#00236F' }} />
+          <div className="h-full rounded-full transition-all duration-300"
+            style={{ width: `${Math.min(100, qtyPct)}%`, backgroundColor: progressColor(qtyPct) }} />
         </div>
       )}
 
       {section.hasFinancials && section.usage_pct >= 80 && (
-        <p className="text-xs font-medium mt-1.5" style={{ color: '#E24B4A' }}>
+        <p className="text-xs font-medium mt-1.5" style={{ color: progressColor(section.usage_pct) }}>
           {section.usage_pct >= 100 ? 'Over budget' : `${section.usage_pct}% used — near limit`}
         </p>
       )}

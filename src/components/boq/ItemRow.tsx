@@ -1,4 +1,4 @@
-import BudgetProgressBar from './BudgetProgressBar'
+import BudgetProgressBar, { progressColor } from './BudgetProgressBar'
 import { formatCurrency } from '@/lib/utils'
 import type { BOQItemView } from '@/types/database'
 
@@ -32,7 +32,7 @@ export default function ItemRow({ item }: { item: BOQItemView }) {
         )}
         {isNearLimit && (
           <span className="text-xs font-medium px-2 py-1 rounded-full flex-shrink-0"
-            style={{ color: '#E24B4A', backgroundColor: '#FFF5F5' }}>
+            style={{ color: '#EF9F27', backgroundColor: '#FFF8E7', border: '1px solid #F5D76E' }}>
             Near limit
           </span>
         )}
@@ -61,12 +61,13 @@ export default function ItemRow({ item }: { item: BOQItemView }) {
             <BudgetProgressBar used={item.used_total ?? 0} total={item.budgeted_total ?? 0} />
           ) : (
             <div className="rounded-full overflow-hidden" style={{ height: '6px', backgroundColor: '#EEEEEE' }}>
-              <div className="h-full rounded-full" style={{ width: `${Math.min(100, progressPct)}%`, backgroundColor: '#00236F' }} />
+              <div className="h-full rounded-full transition-all duration-300"
+                style={{ width: `${Math.min(100, progressPct)}%`, backgroundColor: progressColor(progressPct) }} />
             </div>
           )}
         </div>
         <span className="text-xs font-medium flex-shrink-0"
-          style={{ color: progressPct >= 80 && hasFinancials ? '#E24B4A' : '#666666' }}>
+          style={{ color: progressPct >= 80 ? progressColor(progressPct) : '#666666' }}>
           {hasFinancials
             ? `${progressPct.toFixed(1)}%`
             : `${item.used_quantity} / ${item.quantity} ${item.unit}`}

@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useBOQItems } from '@/hooks/useBOQItems'
 import { formatCurrency } from '@/lib/utils'
 import ItemRow from '@/components/boq/ItemRow'
-import BudgetProgressBar from '@/components/boq/BudgetProgressBar'
+import BudgetProgressBar, { progressColor } from '@/components/boq/BudgetProgressBar'
 import TodayLogsSection from '@/components/boq/TodayLogsSection'
 
 export default function SectionDetailPage({
@@ -98,13 +98,8 @@ export default function SectionDetailPage({
           </div>
           <BudgetProgressBar used={sectionUsed} total={sectionBudget} />
           {usagePct >= 80 && (
-            <p
-              className="text-xs font-medium mt-1.5"
-              style={{ color: '#E24B4A' }}
-            >
-              {usagePct >= 100
-                ? 'Over budget'
-                : `${usagePct}% used — near limit`}
+            <p className="text-xs font-medium mt-1.5" style={{ color: progressColor(usagePct) }}>
+              {usagePct >= 100 ? 'Over budget' : `${usagePct}% used — near limit`}
             </p>
           )}
         </div>

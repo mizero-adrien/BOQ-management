@@ -1,3 +1,11 @@
+function progressColor(pct: number): string {
+  if (pct >= 100) return '#E24B4A'
+  if (pct >= 80)  return '#EF9F27'
+  return '#5DCAA5'
+}
+
+export { progressColor }
+
 export default function BudgetProgressBar({
   used,
   total,
@@ -8,9 +16,6 @@ export default function BudgetProgressBar({
   height?: number
 }) {
   const pct = total > 0 ? Math.min((used / total) * 100, 100) : 0
-  const isWarning = pct >= 80 && pct < 100
-  const isDanger = pct >= 100
-  const barColor = isDanger || isWarning ? '#E24B4A' : '#00236F'
 
   return (
     <div
@@ -19,10 +24,7 @@ export default function BudgetProgressBar({
     >
       <div
         className="h-full rounded-full transition-all duration-300"
-        style={{
-          width: `${pct}%`,
-          backgroundColor: barColor,
-        }}
+        style={{ width: `${pct}%`, backgroundColor: progressColor(pct) }}
       />
     </div>
   )
