@@ -13,6 +13,7 @@ interface Props {
   onAddItem: (sectionId: string, item: NewBOQItem) => Promise<void>
   onUpdateItem: (id: string, updates: BOQItemUpdate) => Promise<void>
   onDeleteItem: (id: string) => Promise<void>
+  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>
 }
 
 function barColor(pct: number): string {
@@ -21,7 +22,7 @@ function barColor(pct: number): string {
   return '#00236F'
 }
 
-export default function BOQSectionCard({ section, onUpdateSection, onDeleteSection, onAddItem, onUpdateItem, onDeleteItem }: Props) {
+export default function BOQSectionCard({ section, onUpdateSection, onDeleteSection, onAddItem, onUpdateItem, onDeleteItem, dragHandleProps }: Props) {
   const [expanded, setExpanded]       = useState(false)
   const [menuOpen, setMenuOpen]       = useState(false)
   const [editingTitle, setEditTitle]  = useState(false)
@@ -46,6 +47,22 @@ export default function BOQSectionCard({ section, onUpdateSection, onDeleteSecti
       {/* Header */}
       <div className="flex items-center gap-2.5 px-4 py-3.5 bg-white rounded-xl cursor-pointer"
         onClick={() => !editingTitle && setExpanded((v) => !v)}>
+        {dragHandleProps && (
+          <button
+            type="button"
+            {...dragHandleProps}
+            onClick={(e) => e.stopPropagation()}
+            className="flex-shrink-0 touch-none cursor-grab active:cursor-grabbing p-0.5 -ml-1 rounded"
+            style={{ color: '#BBBBBB' }}
+            aria-label="Drag to reorder"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="8"  cy="6"  r="1.5" /><circle cx="16" cy="6"  r="1.5" />
+              <circle cx="8"  cy="12" r="1.5" /><circle cx="16" cy="12" r="1.5" />
+              <circle cx="8"  cy="18" r="1.5" /><circle cx="16" cy="18" r="1.5" />
+            </svg>
+          </button>
+        )}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           style={{ flexShrink: 0, transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }}>
           <polyline points="9 18 15 12 9 6" />

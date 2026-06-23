@@ -30,7 +30,7 @@ export default function PMBOQPage() {
 
   const {
     sections, loading: boqLoading, error, summary,
-    addSection, bulkAddItems, updateSection, deleteSection,
+    addSection, bulkAddItems, updateSection, deleteSection, reorderSections,
     addItem, updateItem, deleteItem,
   } = usePMBOQ(selectedProjectId)
 
@@ -176,6 +176,7 @@ export default function PMBOQPage() {
             onAddSection={addSection}
             onUpdateSection={updateSection}
             onDeleteSection={deleteSection}
+            onReorderSections={reorderSections}
             onAddItem={addItem}
             onUpdateItem={updateItem}
             onDeleteItem={deleteItem}

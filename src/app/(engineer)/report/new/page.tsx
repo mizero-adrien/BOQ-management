@@ -75,6 +75,7 @@ export default function NewReportPage() {
   const { submit, submitting, error } = useSubmitReport()
 
   const [step, setStep] = useState(1)
+  const [stepDir, setStepDir] = useState<'fwd' | 'bwd'>('fwd')
   const [form, setForm] = useState<ReportFormState>(initialForm)
   const [savingDraft, setSavingDraft] = useState(false)
   const [draftRestored, setDraftRestored] = useState(false)
@@ -129,7 +130,10 @@ export default function NewReportPage() {
     return <AlreadySubmitted />
   }
 
-  function go(next: number) { setStep(next) }
+  function go(next: number) {
+    setStepDir(next > step ? 'fwd' : 'bwd')
+    setStep(next)
+  }
 
   const zoneName = zones.find((z) => z.id === form.zoneId)?.name ?? form.zoneName
 
@@ -213,10 +217,12 @@ export default function NewReportPage() {
         </div>
       )}
 
-      {step === 1 && <ZoneProgressStep zones={zones} zoneId={form.zoneId} zoneName={form.zoneName} progressPct={form.progressPct} onZoneIdChange={(v) => update('zoneId', v)} onZoneNameChange={(v) => update('zoneName', v)} onProgressChange={(v) => update('progressPct', v)} />}
-      {step === 2 && <WorkersWeatherStep workersCount={form.workersCount} weather={form.weather} onWorkersChange={(v) => update('workersCount', v)} onWeatherChange={(v) => update('weather', v)} />}
-      {step === 3 && <PhotosStep photos={form.photos} onPhotosChange={(v) => update('photos', v)} />}
-      {step === 4 && <IssuesNotesStep issues={form.issues} notes={form.notes} zoneName={zoneName} progressPct={form.progressPct} workersCount={form.workersCount} weather={form.weather} photosCount={form.photos.length} onIssuesChange={(v) => update('issues', v)} onNotesChange={(v) => update('notes', v)} />}
+      <div key={step} style={{ animation: `${stepDir === 'fwd' ? 'step-in-right' : 'step-in-left'} 0.22s ease both` }}>
+        {step === 1 && <ZoneProgressStep zones={zones} zoneId={form.zoneId} zoneName={form.zoneName} progressPct={form.progressPct} onZoneIdChange={(v) => update('zoneId', v)} onZoneNameChange={(v) => update('zoneName', v)} onProgressChange={(v) => update('progressPct', v)} />}
+        {step === 2 && <WorkersWeatherStep workersCount={form.workersCount} weather={form.weather} onWorkersChange={(v) => update('workersCount', v)} onWeatherChange={(v) => update('weather', v)} />}
+        {step === 3 && <PhotosStep photos={form.photos} onPhotosChange={(v) => update('photos', v)} />}
+        {step === 4 && <IssuesNotesStep issues={form.issues} notes={form.notes} zoneName={zoneName} progressPct={form.progressPct} workersCount={form.workersCount} weather={form.weather} photosCount={form.photos.length} onIssuesChange={(v) => update('issues', v)} onNotesChange={(v) => update('notes', v)} />}
+      </div>
 
       <FormNavigation step={step} submitting={submitting} onNext={() => go(step + 1)} onBack={() => go(step - 1)} onSubmit={handleSubmit} />
     </div>

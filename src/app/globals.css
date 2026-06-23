@@ -58,6 +58,25 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes step-in-right {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes step-in-left {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0deg); }
+  15%       { transform: rotate(14deg); }
+  30%       { transform: rotate(-11deg); }
+  45%       { transform: rotate(8deg); }
+  60%       { transform: rotate(-5deg); }
+  75%       { transform: rotate(3deg); }
+}
+
 @layer components {
   .btn-primary {
     @apply bg-primary text-white font-semibold text-sm py-3 px-4 rounded-lg w-full text-center transition-opacity active:opacity-80;

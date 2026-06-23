@@ -190,10 +190,18 @@ export function usePMBOQ(projectId: string | null | undefined) {
     toast.success('Item deleted')
   }
 
+  async function reorderSections(reordered: BOQSectionWithItems[]) {
+    setSections(reordered)
+    const supabase = createClient()
+    await Promise.all(reordered.map((s, idx) =>
+      supabase.from('boq_sections').update({ order_index: idx + 1 }).eq('id', s.id)
+    ))
+  }
+
   return {
     sections, loading, error, summary,
     totalBudget: totalBudgeted, totalUsed, totalRemaining: totalBudgeted - totalUsed, usagePct: summary.usage_pct,
-    addSection, bulkAddItems, updateSection, deleteSection,
+    addSection, bulkAddItems, updateSection, deleteSection, reorderSections,
     addItem, updateItem, deleteItem, refetch: fetchBOQ,
   }
 }
