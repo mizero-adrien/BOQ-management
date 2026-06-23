@@ -171,8 +171,15 @@ export default function InventoryPage() {
       <p className="text-sm mb-5" style={{ color: '#666666' }}>{project.name}</p>
 
       {sections.length === 0 ? (
-        <div className="bg-white rounded-xl p-8 text-center" style={{ border: '0.5px solid #EEEEEE' }}>
-          <p className="text-sm" style={{ color: '#BBBBBB' }}>No BOQ items found for this project.</p>
+        <div className="bg-white rounded-xl py-14 px-8 flex flex-col items-center text-center" style={{ border: '0.5px solid #EEEEEE' }}>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="3" y1="15" x2="21" y2="15" />
+            <line x1="9" y1="9" x2="9" y2="21" />
+          </svg>
+          <p className="mt-3 text-sm font-semibold" style={{ color: '#111111' }}>No inventory yet</p>
+          <p className="mt-1 text-xs" style={{ color: '#BBBBBB' }}>Your project manager needs to create BOQ sections and items before inventory is visible here.</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl overflow-hidden" style={{ border: '0.5px solid #EEEEEE' }}>

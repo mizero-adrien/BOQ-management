@@ -8,6 +8,29 @@ import { createClient } from '@/lib/supabase/client'
 import { useMaterialLogs } from '@/hooks/useMaterialLogs'
 import { formatDate } from '@/lib/utils/index'
 
+function LogsEmptyState() {
+  return (
+    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '0.5px solid #EEEEEE', padding: '40px 32px', textAlign: 'center' }}>
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto' }}>
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+        <rect x="9" y="3" width="6" height="4" rx="1" />
+        <line x1="9" y1="12" x2="15" y2="12" />
+        <line x1="9" y1="16" x2="13" y2="16" />
+      </svg>
+      <p style={{ marginTop: '12px', fontSize: '14px', fontWeight: '600', color: '#111111' }}>No material logs yet</p>
+      <p style={{ marginTop: '4px', fontSize: '12px', color: '#BBBBBB' }}>Record your first stock movement to start tracking.</p>
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px' }}>
+        <Link href="/storekeeper/stock-out" style={{ padding: '8px 16px', fontSize: '13px', fontWeight: '600', color: '#FFFFFF', backgroundColor: '#00236F', borderRadius: '8px', textDecoration: 'none' }}>
+          Log stock out
+        </Link>
+        <Link href="/storekeeper/stock-in" style={{ padding: '8px 16px', fontSize: '13px', fontWeight: '600', color: '#00236F', backgroundColor: '#E4E9FA', borderRadius: '8px', textDecoration: 'none' }}>
+          Log stock in
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 interface Project {
   id: string
   name: string
@@ -186,9 +209,7 @@ export default function StorekeeperDashboardPage() {
         {/* Recent logs */}
         <p style={{ fontSize: '11px', fontWeight: '600', color: '#BBBBBB', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>Recent Logs</p>
         {recentLogs.length === 0 ? (
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '0.5px solid #EEEEEE' }}>
-            <p style={{ fontSize: '14px', color: '#BBBBBB' }}>No material logs yet.</p>
-          </div>
+          <LogsEmptyState />
         ) : (
           <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '0.5px solid #EEEEEE', overflow: 'hidden' }}>
             {recentLogs.map((log, i) => (

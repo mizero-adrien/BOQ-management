@@ -43,8 +43,15 @@ export default function QSDashboardPage() {
       {/* BOQ Sections summary */}
       <h2 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#BBBBBB' }}>BOQ Sections</h2>
       {sections.length === 0 ? (
-        <div className="bg-white rounded-xl p-5 text-center mb-4" style={{ border: '0.5px solid #EEEEEE' }}>
-          <p className="text-sm" style={{ color: '#BBBBBB' }}>No BOQ sections yet.</p>
+        <div className="bg-white rounded-xl px-8 py-10 flex flex-col items-center text-center mb-4" style={{ border: '0.5px solid #EEEEEE' }}>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="3" y1="15" x2="21" y2="15" />
+            <line x1="9" y1="9" x2="9" y2="21" />
+          </svg>
+          <p className="mt-3 text-sm font-semibold" style={{ color: '#111111' }}>No BOQ sections yet</p>
+          <p className="mt-1 text-xs" style={{ color: '#BBBBBB' }}>Ask your project manager to create BOQ sections so you can start tracking costs.</p>
         </div>
       ) : (
         <div className="space-y-2 mb-6">

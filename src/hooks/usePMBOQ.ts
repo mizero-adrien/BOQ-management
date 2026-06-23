@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { BOQSection, BOQItem } from '@/types/database'
+import { toast } from '@/lib/toast'
 
 export interface BOQItemWithComputed extends BOQItem {
   usage_pct: number
@@ -134,15 +135,17 @@ export function usePMBOQ(projectId: string | null | undefined) {
   async function updateSection(sectionId: string, title: string) {
     const supabase = createClient()
     const { error: err } = await supabase.from('boq_sections').update({ title }).eq('id', sectionId)
-    if (err) { console.error('updateSection:', err.message); return }
+    if (err) { console.error('updateSection:', err.message); toast.error('Could not rename section', err.message); return }
     setSections((prev) => prev.map((s) => s.id === sectionId ? { ...s, title } : s))
+    toast.success('Section renamed', title)
   }
 
   async function deleteSection(sectionId: string) {
     const supabase = createClient()
     const { error: err } = await supabase.from('boq_sections').delete().eq('id', sectionId)
-    if (err) { console.error('deleteSection:', err.message); return }
+    if (err) { console.error('deleteSection:', err.message); toast.error('Could not delete section', err.message); return }
     setSections((prev) => prev.filter((s) => s.id !== sectionId))
+    toast.success('Section deleted')
   }
 
   async function addItem(sectionId: string, item: NewBOQItem) {
@@ -153,7 +156,7 @@ export function usePMBOQ(projectId: string | null | undefined) {
       .from('boq_items')
       .insert({ section_id: sectionId, description: item.description, unit: item.unit, quantity: item.quantity, unit_rate: item.unit_rate, order_index: maxOrder + 1, used_quantity: 0, used_total: 0, status: 'not_started' })
       .select('*').single()
-    if (err) { console.error('addItem:', err.message); return }
+    if (err) { console.error('addItem:', err.message); toast.error('Could not add item', err.message); return }
     const newItem: BOQItemWithComputed = { ...data, usage_pct: 0 }
     setSections((prev) => prev.map((s) => {
       if (s.id !== sectionId) return s
@@ -162,19 +165,21 @@ export function usePMBOQ(projectId: string | null | undefined) {
       const tu = newItems.reduce((sum, i) => sum + (i.used_total ?? 0), 0)
       return { ...s, items: newItems, total_budgeted: tb, total_used: tu, usage_pct: tb > 0 ? (tu / tb) * 100 : 0 }
     }))
+    toast.success('Item added', item.description)
   }
 
   async function updateItem(itemId: string, updates: BOQItemUpdate) {
     const supabase = createClient()
     const { error: err } = await supabase.from('boq_items').update(updates).eq('id', itemId)
-    if (err) { console.error('updateItem:', err.message); return }
+    if (err) { console.error('updateItem:', err.message); toast.error('Could not save item', err.message); return }
     await fetchBOQ()
+    toast.success('Item saved')
   }
 
   async function deleteItem(itemId: string) {
     const supabase = createClient()
     const { error: err } = await supabase.from('boq_items').delete().eq('id', itemId)
-    if (err) { console.error('deleteItem:', err.message); return }
+    if (err) { console.error('deleteItem:', err.message); toast.error('Could not delete item', err.message); return }
     setSections((prev) => prev.map((s) => {
       const newItems = s.items.filter((i) => i.id !== itemId)
       if (newItems.length === s.items.length) return s
@@ -182,6 +187,7 @@ export function usePMBOQ(projectId: string | null | undefined) {
       const tu = newItems.reduce((sum, i) => sum + (i.used_total ?? 0), 0)
       return { ...s, items: newItems, total_budgeted: tb, total_used: tu, usage_pct: tb > 0 ? (tu / tb) * 100 : 0 }
     }))
+    toast.success('Item deleted')
   }
 
   return {
