@@ -25,6 +25,7 @@ export default function ZoneDrawingCanvas({ projectId, planImageUrl, zones, onZo
   const [drawing, setDrawing] = useState<Rect | null>(null)
   const [pending, setPending] = useState<Rect | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [newName, setNewName] = useState('')
   const [saving, setSaving] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -81,6 +82,7 @@ export default function ZoneDrawingCanvas({ projectId, planImageUrl, zones, onZo
     await supabase.from('plan_zones').delete().eq('id', selectedId)
     onZoneDeleted(selectedId)
     setSelectedId(null)
+    setConfirmDelete(false)
   }
 
   const drawRect = drawing ? normalizeRect(drawing) : null
@@ -89,18 +91,33 @@ export default function ZoneDrawingCanvas({ projectId, planImageUrl, zones, onZo
     <div>
       <div className="flex items-center gap-2 mb-2">
         {(['draw', 'view'] as const).map((m) => (
-          <button key={m} type="button" onClick={() => { setMode(m); setSelectedId(null) }}
+          <button key={m} type="button" onClick={() => { setMode(m); setSelectedId(null); setConfirmDelete(false) }}
             className="px-3 py-1.5 text-xs rounded-lg font-medium"
             style={{ backgroundColor: mode === m ? '#00236F' : '#F5F6FA', color: mode === m ? '#FFFFFF' : '#111111', border: '1px solid #EEEEEE' }}>
             {m === 'draw' ? 'Draw zone' : 'Select'}
           </button>
         ))}
-        {selectedId && (
-          <button type="button" onClick={deleteSelected}
+        {selectedId && !confirmDelete && (
+          <button type="button" onClick={() => setConfirmDelete(true)}
             className="px-3 py-1.5 text-xs rounded-lg font-medium"
             style={{ backgroundColor: '#FFF5F5', color: '#E24B4A', border: '1px solid #E24B4A' }}>
             Delete zone
           </button>
+        )}
+        {selectedId && confirmDelete && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs" style={{ color: '#E24B4A' }}>Delete this zone?</span>
+            <button type="button" onClick={deleteSelected}
+              className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-white"
+              style={{ backgroundColor: '#E24B4A' }}>
+              Delete
+            </button>
+            <button type="button" onClick={() => setConfirmDelete(false)}
+              className="px-2.5 py-1.5 text-xs rounded-lg"
+              style={{ color: '#666666', border: '1px solid #EEEEEE' }}>
+              Cancel
+            </button>
+          </div>
         )}
       </div>
 
@@ -111,7 +128,7 @@ export default function ZoneDrawingCanvas({ projectId, planImageUrl, zones, onZo
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ pointerEvents: mode === 'view' ? 'auto' : 'none' }}>
           {zones.map((zone) => (
             <g key={zone.id} style={{ cursor: 'pointer' }}
-              onClick={(e) => { e.stopPropagation(); setSelectedId((id) => id === zone.id ? null : zone.id) }}>
+              onClick={(e) => { e.stopPropagation(); setSelectedId((id) => id === zone.id ? null : zone.id); setConfirmDelete(false) }}>
               <rect x={zone.x_pct} y={zone.y_pct} width={zone.width_pct} height={zone.height_pct}
                 fill={`${zone.color}40`} stroke={selectedId === zone.id ? '#E24B4A' : zone.color}
                 strokeWidth={selectedId === zone.id ? '0.8' : '0.5'} />
