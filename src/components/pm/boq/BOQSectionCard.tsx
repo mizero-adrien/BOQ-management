@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { PMBOQSection, NewBOQItem, BOQItemUpdate } from '@/hooks/usePMBOQ'
 import { formatCurrency } from '@/lib/utils'
 import BOQSectionBody from './BOQSectionBody'
+import Spinner from '@/components/shared/Spinner'
 
 interface Props {
   section: PMBOQSection
@@ -25,12 +26,17 @@ export default function BOQSectionCard({ section, onUpdateSection, onDeleteSecti
   const [menuOpen, setMenuOpen]       = useState(false)
   const [editingTitle, setEditTitle]  = useState(false)
   const [title, setTitle]             = useState(section.title)
+  const [savingTitle, setSavingTitle] = useState(false)
   const [showDelete, setShowDelete]   = useState(false)
+  const [deleting, setDeleting]       = useState(false)
 
   const color = barColor(section.usage_pct)
 
   async function saveTitle() {
-    if (title.trim()) await onUpdateSection(section.id, title.trim())
+    if (!title.trim()) return
+    setSavingTitle(true)
+    await onUpdateSection(section.id, title.trim())
+    setSavingTitle(false)
     setEditTitle(false)
     setMenuOpen(false)
   }
@@ -74,9 +80,11 @@ export default function BOQSectionCard({ section, onUpdateSection, onDeleteSecti
         </div>
 
         {editingTitle && (
-          <button type="button" onClick={(e) => { e.stopPropagation(); saveTitle() }}
-            className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg flex-shrink-0" style={{ backgroundColor: '#00236F' }}>
-            Save
+          <button type="button" onClick={(e) => { e.stopPropagation(); saveTitle() }} disabled={savingTitle}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-lg flex-shrink-0 disabled:opacity-60"
+            style={{ backgroundColor: '#00236F' }}>
+            {savingTitle && <Spinner size={12} />}
+            {savingTitle ? 'Saving…' : 'Save'}
           </button>
         )}
 
@@ -108,11 +116,14 @@ export default function BOQSectionCard({ section, onUpdateSection, onDeleteSecti
         <div className="px-4 py-3 border-t" style={{ backgroundColor: '#FFF5F5', borderColor: '#FFCCCC' }}>
           <p className="text-sm mb-2" style={{ color: '#E24B4A' }}>Delete this section and all its items? This cannot be undone.</p>
           <div className="flex gap-2">
-            <button type="button" onClick={() => onDeleteSection(section.id)}
-              className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg" style={{ backgroundColor: '#E24B4A' }}>
-              Delete
+            <button type="button" disabled={deleting}
+              onClick={async () => { setDeleting(true); await onDeleteSection(section.id); setDeleting(false) }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
+              style={{ backgroundColor: '#E24B4A' }}>
+              {deleting && <Spinner size={12} />}
+              {deleting ? 'Deleting…' : 'Delete'}
             </button>
-            <button type="button" onClick={() => setShowDelete(false)} className="text-xs" style={{ color: '#666666' }}>Cancel</button>
+            <button type="button" onClick={() => setShowDelete(false)} disabled={deleting} className="text-xs" style={{ color: '#666666' }}>Cancel</button>
           </div>
         </div>
       )}

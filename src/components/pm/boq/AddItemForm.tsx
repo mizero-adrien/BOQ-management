@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { formatCurrency } from '@/lib/utils'
 import type { NewBOQItem } from '@/hooks/usePMBOQ'
+import Spinner from '@/components/shared/Spinner'
 
 interface Props {
   sectionId: string
@@ -65,10 +66,11 @@ export default function AddItemForm({ sectionId, nextOrderIndex, onSave, onCance
         <div className="flex items-center gap-2">
           <button
             type="button" onClick={handleSave} disabled={saving}
-            className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-50"
             style={{ backgroundColor: '#00236F' }}
           >
-            {saving ? '...' : 'Save'}
+            {saving && <Spinner size={12} />}
+            {saving ? 'Saving…' : 'Save item'}
           </button>
           <button type="button" onClick={onCancel} className="text-xs" style={{ color: '#666666' }}>Cancel</button>
         </div>

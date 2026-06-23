@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { formatCurrency } from '@/lib/utils'
 import type { BOQItem } from '@/types/database'
 import type { BOQItemUpdate } from '@/hooks/usePMBOQ'
+import Spinner from '@/components/shared/Spinner'
 
 const STATUS_MAP: Record<string, { label: string; bg: string; color: string; border?: string }> = {
   not_started: { label: 'Not started', bg: '#F5F6FA', color: '#BBBBBB' },
@@ -27,13 +28,14 @@ interface Props {
 const FS = { backgroundColor: '#FFFFFF', border: '1px solid #EEEEEE', color: '#111111' }
 
 export default function BOQItemCard({ item, onSave, onDelete }: Props) {
-  const [editing, setEditing] = useState(false)
-  const [showDel, setShowDel] = useState(false)
-  const [desc, setDesc]       = useState(item.description)
-  const [unit, setUnit]       = useState(item.unit)
-  const [qty, setQty]         = useState(String(item.quantity))
-  const [rate, setRate]       = useState(String(item.unit_rate))
-  const [saving, setSaving]   = useState(false)
+  const [editing, setEditing]   = useState(false)
+  const [showDel, setShowDel]   = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [desc, setDesc]         = useState(item.description)
+  const [unit, setUnit]         = useState(item.unit)
+  const [qty, setQty]           = useState(String(item.quantity))
+  const [rate, setRate]         = useState(String(item.unit_rate))
+  const [saving, setSaving]     = useState(false)
 
   const pct = item.budgeted_total > 0 ? (item.used_total / item.budgeted_total) * 100 : 0
   const st = STATUS_MAP[item.status] ?? STATUS_MAP.not_started
@@ -50,9 +52,14 @@ export default function BOQItemCard({ item, onSave, onDelete }: Props) {
       <div className="rounded-lg p-3 mb-2" style={{ backgroundColor: '#FFF5F5', border: '1px solid #E24B4A' }}>
         <p className="text-sm mb-2" style={{ color: '#E24B4A' }}>Delete this line item?</p>
         <div className="flex gap-2">
-          <button type="button" onClick={() => onDelete(item.id)}
-            className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg" style={{ backgroundColor: '#E24B4A' }}>Delete</button>
-          <button type="button" onClick={() => setShowDel(false)} className="text-xs" style={{ color: '#666666' }}>Cancel</button>
+          <button type="button" disabled={deleting}
+            onClick={async () => { setDeleting(true); await onDelete(item.id); setDeleting(false) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
+            style={{ backgroundColor: '#E24B4A' }}>
+            {deleting && <Spinner size={12} />}
+            {deleting ? 'Deleting…' : 'Delete'}
+          </button>
+          <button type="button" onClick={() => setShowDel(false)} disabled={deleting} className="text-xs" style={{ color: '#666666' }}>Cancel</button>
         </div>
       </div>
     )
@@ -79,8 +86,10 @@ export default function BOQItemCard({ item, onSave, onDelete }: Props) {
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={handleSave} disabled={saving}
-            className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-50" style={{ backgroundColor: '#00236F' }}>
-            {saving ? '...' : 'Save'}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-lg disabled:opacity-50"
+            style={{ backgroundColor: '#00236F' }}>
+            {saving && <Spinner size={12} />}
+            {saving ? 'Saving…' : 'Save'}
           </button>
           <button type="button" onClick={() => setEditing(false)} className="text-xs" style={{ color: '#666666' }}>Cancel</button>
         </div>

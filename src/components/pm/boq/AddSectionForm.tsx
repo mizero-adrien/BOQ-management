@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Spinner from '@/components/shared/Spinner'
 
 interface Props {
   projectId: string
@@ -41,10 +42,11 @@ export default function AddSectionForm({ projectId, onSave, onCancel }: Props) {
           type="button"
           onClick={handleSave}
           disabled={saving || !title.trim()}
-          className="px-4 py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-50"
           style={{ backgroundColor: '#00236F' }}
         >
-          {saving ? 'Saving...' : 'Save section'}
+          {saving && <Spinner size={12} />}
+          {saving ? 'Saving…' : 'Save section'}
         </button>
         <button type="button" onClick={onCancel} className="px-3 py-2 text-xs rounded-lg" style={{ color: '#666666' }}>
           Cancel
