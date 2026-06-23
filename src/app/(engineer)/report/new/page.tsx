@@ -30,6 +30,8 @@ interface ReportFormState {
   notes: string
 }
 
+type DraftData = Omit<ReportFormState, 'photos'> & { step: number }
+
 const initialForm: ReportFormState = {
   zoneId: null,
   zoneName: '',
@@ -39,6 +41,28 @@ const initialForm: ReportFormState = {
   photos: [],
   issues: '',
   notes: '',
+}
+
+function draftKey(projectId: string): string {
+  const today = new Date().toISOString().slice(0, 10)
+  return `report_draft_${projectId}_${today}`
+}
+
+function readDraft(projectId: string): DraftData | null {
+  try {
+    const raw = localStorage.getItem(draftKey(projectId))
+    return raw ? (JSON.parse(raw) as DraftData) : null
+  } catch {
+    return null
+  }
+}
+
+function writeDraft(projectId: string, data: DraftData) {
+  try { localStorage.setItem(draftKey(projectId), JSON.stringify(data)) } catch {}
+}
+
+function clearDraft(projectId: string) {
+  try { localStorage.removeItem(draftKey(projectId)) } catch {}
 }
 
 export default function NewReportPage() {
@@ -53,6 +77,41 @@ export default function NewReportPage() {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<ReportFormState>(initialForm)
   const [savingDraft, setSavingDraft] = useState(false)
+  const [draftRestored, setDraftRestored] = useState(false)
+
+  // Restore draft once project is known
+  useEffect(() => {
+    if (!project) return
+    const saved = readDraft(project.id)
+    if (!saved) return
+    setForm((f) => ({
+      ...f,
+      zoneId: saved.zoneId,
+      zoneName: saved.zoneName,
+      progressPct: saved.progressPct,
+      workersCount: saved.workersCount,
+      weather: saved.weather,
+      issues: saved.issues,
+      notes: saved.notes,
+    }))
+    setStep(saved.step ?? 1)
+    setDraftRestored(true)
+  }, [project?.id])
+
+  // Autosave on every change (debounced 600ms); photos excluded — not serialisable
+  useEffect(() => {
+    if (!project) return
+    const t = setTimeout(() => {
+      const { photos: _, ...rest } = form
+      writeDraft(project.id, { ...rest, step })
+    }, 600)
+    return () => clearTimeout(t)
+  }, [form, step, project?.id])
+
+  // Clear draft once today's report is confirmed submitted
+  useEffect(() => {
+    if (submitted && project) clearDraft(project.id)
+  }, [submitted, project?.id])
 
   useEffect(() => {
     if (error) toast.error('Failed to submit report', error)
@@ -100,6 +159,7 @@ export default function NewReportPage() {
       console.error('[report] draft save error:', err)
     } finally {
       setSavingDraft(false)
+      if (project) clearDraft(project.id)
       router.push('/dashboard')
     }
   }
@@ -140,6 +200,18 @@ export default function NewReportPage() {
       </div>
 
       <StepIndicator currentStep={step} />
+
+      {draftRestored && (
+        <div className="mx-4 mt-3 px-3 py-2 rounded-lg flex items-center justify-between gap-2"
+          style={{ backgroundColor: '#E4E9FA', border: '1px solid #C8D4F8' }}>
+          <p className="text-xs" style={{ color: '#00236F' }}>Draft restored — your progress from earlier today was saved.</p>
+          <button type="button" onClick={() => setDraftRestored(false)} className="flex-shrink-0" style={{ color: '#00236F' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {step === 1 && <ZoneProgressStep zones={zones} zoneId={form.zoneId} zoneName={form.zoneName} progressPct={form.progressPct} onZoneIdChange={(v) => update('zoneId', v)} onZoneNameChange={(v) => update('zoneName', v)} onProgressChange={(v) => update('progressPct', v)} />}
       {step === 2 && <WorkersWeatherStep workersCount={form.workersCount} weather={form.weather} onWorkersChange={(v) => update('workersCount', v)} onWeatherChange={(v) => update('weather', v)} />}
