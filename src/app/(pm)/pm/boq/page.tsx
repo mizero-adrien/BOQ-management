@@ -8,7 +8,6 @@ import { usePMBOQ } from '@/hooks/usePMBOQ'
 import type { ParsedBOQSection } from '@/lib/boq/parseExcel'
 import BOQSummaryCards from '@/components/pm/boq/BOQSummaryCards'
 import BOQSectionList from '@/components/pm/boq/BOQSectionList'
-import BOQSkeleton from '@/components/pm/boq/BOQSkeleton'
 import EmptyBOQState from '@/components/pm/boq/EmptyBOQState'
 import ImportBOQModal from '@/components/pm/boq/ImportBOQModal'
 import AddSectionForm from '@/components/pm/boq/AddSectionForm'
@@ -183,7 +182,11 @@ export default function PMBOQPage() {
 
       {/* Content */}
       {isLoading ? (
-        <BOQSkeleton />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '80px', paddingBottom: '80px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid #EEEEEE', borderTopColor: '#00236F', animation: 'spin 0.8s linear infinite', marginBottom: '16px' }} />
+          <p style={{ fontSize: '14px', color: '#666666', fontWeight: 500 }}>Loading BOQ data...</p>
+          <p style={{ fontSize: '12px', color: '#BBBBBB', marginTop: '4px' }}>This may take a moment</p>
+        </div>
       ) : projectsError ? (
         <ProjectsFetchError />
       ) : projects.length === 0 ? (
