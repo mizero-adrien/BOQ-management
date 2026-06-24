@@ -46,11 +46,17 @@ export default function AIQuantityCalculator({ onAddItems }: { onAddItems: (item
 
   return (
     <div style={{ backgroundColor: '#FFFFFF', borderRadius: '14px', border: '0.5px solid #EEEEEE', padding: '20px' }}>
-      <p style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>AI Quantity Calculator</p>
+      <p style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '4px' }}>AI Quantity Calculator</p>
+      <p style={{ fontSize: '12px', color: '#666666', marginBottom: '12px' }}>Describe the construction work and AI will generate a full BOQ with quantities and estimated rates.</p>
       <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
-          placeholder="Describe the construction work — e.g. 'Build a 6m x 8m reinforced concrete slab, 150mm thick, for a residential floor'"
-          style={{ flex: 1, padding: '10px 12px', fontSize: '13px', borderRadius: '8px', border: '0.5px solid #EEEEEE', resize: 'none', outline: 'none', backgroundColor: '#F5F6FA', color: '#111111', lineHeight: 1.5 }} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 600, color: '#111111', letterSpacing: '0.01em' }}>
+            Work description
+          </label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
+            placeholder="e.g. Build a 6m x 8m reinforced concrete slab, 150mm thick, for a residential floor"
+            style={{ padding: '10px 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #EEEEEE', resize: 'none', outline: 'none', backgroundColor: '#F5F6FA', color: '#111111', lineHeight: 1.5 }} />
+        </div>
         <button type="button" onClick={calculate} disabled={calculating || description.trim().length < 10}
           style={{ alignSelf: 'flex-end', padding: '10px 20px', backgroundColor: calculating ? '#BBBBBB' : '#00236F', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: calculating ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '8px' }}>
           {calculating && <Spinner size={14} />}
