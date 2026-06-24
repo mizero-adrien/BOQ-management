@@ -127,8 +127,8 @@ export default function PMBOQPage() {
           <button
             type="button"
             onClick={() => setShowCalculator((v) => !v)}
-            className="px-3 py-2 rounded-lg text-xs font-semibold text-white"
-            style={{ backgroundColor: showCalculator ? '#15803D' : '#16A34A' }}
+            className="hidden md:block px-3 py-2 rounded-lg text-xs font-medium"
+            style={{ border: '1px solid #16A34A', color: '#16A34A', backgroundColor: showCalculator ? '#DCFCE7' : 'transparent' }}
           >
             AI Calculator
           </button>
