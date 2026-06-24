@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Projects', href: '/pm/projects', icon: ProjectsIcon },
   { label: 'Team', href: '/pm/team', icon: TeamIcon },
   { label: 'BOQ', href: '/pm/boq', icon: BOQIcon },
+  { label: 'Analytics', href: '/pm/analytics', icon: AnalyticsIcon },
   { label: 'Procurement', href: '/pm/procurement', icon: ProcurementIcon },
   { label: 'Profile', href: '/pm/profile', icon: ProfileIcon },
   { label: 'Settings', href: '/pm/settings', icon: SettingsIcon },
@@ -178,6 +179,15 @@ function TeamIcon({ active }: { active: boolean }) {
       <circle cx="9" cy="7" r="4" />
       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+}
+
+function AnalyticsIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+      <path d="M22 12A10 10 0 0 0 12 2v10z" />
     </svg>
   )
 }

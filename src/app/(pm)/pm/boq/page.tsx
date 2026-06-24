@@ -15,12 +15,14 @@ import AddSectionForm from '@/components/pm/boq/AddSectionForm'
 import NoProjectsBOQCard from '@/components/pm/boq/NoProjectsBOQCard'
 import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
 import { toast } from '@/lib/toast'
+import AIQuantityCalculator, { type CalculatedItem } from '@/components/pm/boq/AIQuantityCalculator'
 
 export default function PMBOQPage() {
   const { projects, loading: projectsLoading, error: projectsError } = usePMProjects()
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [showAddSection, setShowAddSection] = useState(false)
   const [showImport, setShowImport] = useState(false)
+  const [showCalculator, setShowCalculator] = useState(false)
 
   useEffect(() => {
     if (projects.length > 0 && !selectedProjectId) {
@@ -66,6 +68,24 @@ export default function PMBOQPage() {
     return id
   }
 
+  async function handleCalculatorItems(items: CalculatedItem[]) {
+    if (!selectedProjectId) return
+    const sectionId = await addSection('AI Calculator Results', selectedProjectId)
+    if (sectionId) {
+      await bulkAddItems(sectionId, items.map((item, idx) => ({
+        description: item.description,
+        unit: item.unit,
+        quantity: item.quantity,
+        unit_rate: item.unit_rate_estimate,
+        order_index: idx + 1,
+      })))
+      toast.success('Items added', `${items.length} items added to new BOQ section`)
+      setShowCalculator(false)
+    } else {
+      toast.error('Could not create section', 'Please try again')
+    }
+  }
+
   async function handleImport(parsedSections: ParsedBOQSection[], onProgress: (done: number, total: number) => void) {
     if (!selectedProjectId) return
     for (let i = 0; i < parsedSections.length; i++) {
@@ -104,6 +124,14 @@ export default function PMBOQPage() {
             style={{ border: '1px solid #00236F', color: '#00236F' }}
           >
             Import
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCalculator((v) => !v)}
+            className="hidden md:block px-3 py-2 rounded-lg text-xs font-medium"
+            style={{ border: '1px solid #778EDE', color: '#778EDE', backgroundColor: showCalculator ? '#E4E9FA' : 'transparent' }}
+          >
+            AI Calculator
           </button>
           <button
             type="button"
@@ -161,12 +189,24 @@ export default function PMBOQPage() {
       ) : projects.length === 0 ? (
         <NoProjectsBOQCard />
       ) : !error && sections.length === 0 ? (
-        <EmptyBOQState
-          onAdd={() => setShowAddSection(true)}
-          onImport={() => setShowImport(true)}
-        />
+        <>
+          {showCalculator && selectedProjectId && (
+            <div style={{ marginBottom: '16px' }}>
+              <AIQuantityCalculator onAddItems={handleCalculatorItems} />
+            </div>
+          )}
+          <EmptyBOQState
+            onAdd={() => setShowAddSection(true)}
+            onImport={() => setShowImport(true)}
+          />
+        </>
       ) : !error && sections.length > 0 ? (
         <>
+          {showCalculator && selectedProjectId && (
+            <div style={{ marginBottom: '16px' }}>
+              <AIQuantityCalculator onAddItems={handleCalculatorItems} />
+            </div>
+          )}
           <BOQSummaryCards summary={summary} />
           <BOQSectionList
             sections={sections}
