@@ -10,7 +10,7 @@ export default function EngineerLayout({ children }: { children: React.ReactNode
   return (
     <PageErrorBoundary>
       <NotificationProvider>
-        <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F5F6FA' }}>
+        <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F4F6F8' }}>
           <MobileTopBar messagesHref="/messages" notificationsHref="/notifications" />
           <Sidebar />
           <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0 md:max-w-[720px] md:mx-auto md:px-6 md:py-6">

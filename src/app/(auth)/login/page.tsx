@@ -74,13 +74,13 @@ function LoginForm() {
       <div className="flex flex-col items-center mb-8">
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-          style={{ backgroundColor: '#00236F' }}
+          style={{ backgroundColor: '#1565D8' }}
         >
           <BuildingIcon />
         </div>
         <h1
           className="text-2xl font-semibold mb-1"
-          style={{ color: '#00236F' }}
+          style={{ color: '#1A2332' }}
         >
           Welcome back
         </h1>
@@ -133,21 +133,21 @@ function LoginForm() {
               autoCapitalize="none"
               className="w-full pl-9 pr-4 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
-                backgroundColor: '#F5F6FA',
+                backgroundColor: '#F4F6F8',
                 border: errors.email
                   ? '1.5px solid #E24B4A'
-                  : '1px solid #EEEEEE',
+                  : '1px solid #CDD6DC',
                 color: '#111111',
               }}
               onFocus={(e) => {
                 if (!errors.email) {
-                  e.target.style.border = '1.5px solid #00236F'
+                  e.target.style.border = '1.5px solid #1565D8'
                 }
               }}
               {...register('email', {
                 onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
                   if (!errors.email) {
-                    e.target.style.border = '1px solid #EEEEEE'
+                    e.target.style.border = '1px solid #CDD6DC'
                   }
                 }
               })}
@@ -177,21 +177,21 @@ function LoginForm() {
               autoComplete="current-password"
               className="w-full pl-9 pr-10 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
-                backgroundColor: '#F5F6FA',
+                backgroundColor: '#F4F6F8',
                 border: errors.password
                   ? '1.5px solid #E24B4A'
-                  : '1px solid #EEEEEE',
+                  : '1px solid #CDD6DC',
                 color: '#111111',
               }}
               onFocus={(e) => {
                 if (!errors.password) {
-                  e.target.style.border = '1.5px solid #00236F'
+                  e.target.style.border = '1.5px solid #1565D8'
                 }
               }}
               {...register('password', {
                 onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
                   if (!errors.password) {
-                    e.target.style.border = '1px solid #EEEEEE'
+                    e.target.style.border = '1px solid #CDD6DC'
                   }
                 }
               })}
@@ -216,7 +216,7 @@ function LoginForm() {
           <Link
             href="/forgot-password"
             className="text-sm font-medium"
-            style={{ color: '#00236F' }}
+            style={{ color: '#1565D8' }}
           >
             Forgot password?
           </Link>
@@ -225,8 +225,8 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-          style={{ backgroundColor: '#00236F' }}
+          className="w-full py-3.5 rounded-md text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+          style={{ backgroundColor: '#1565D8' }}
         >
           {isSubmitting ? 'Signing in...' : 'Sign in'}
         </button>
@@ -238,7 +238,7 @@ function LoginForm() {
         <Link
           href="/signup"
           className="font-semibold"
-          style={{ color: '#00236F' }}
+          style={{ color: '#1565D8' }}
         >
           Sign up
         </Link>
@@ -253,7 +253,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#00236F', animation: 'spin 0.8s linear infinite' }} />
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#1565D8', animation: 'spin 0.8s linear infinite' }} />
         </div>
       }
     >

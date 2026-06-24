@@ -15,6 +15,7 @@ export interface NavItem {
   href: string
   icon: (active: boolean) => React.ReactNode
   exact?: boolean
+  section?: string
 }
 
 interface BaseLayoutProps {
@@ -52,31 +53,27 @@ function BaseSidebar({ navItems, backButton, messagesHref, notificationsHref }: 
   const initials = profile?.full_name?.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() ?? ''
 
   return (
-    <aside className="hidden md:flex md:flex-col md:w-60 md:h-screen md:sticky md:top-0 md:bg-white md:border-r md:flex-shrink-0" style={{ borderColor: '#EEEEEE' }}>
-      <div className="px-6 pt-6 pb-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#00236F' }}>
+    <aside className="hidden md:flex md:flex-col md:flex-shrink-0"
+      style={{ width: '240px', height: '100vh', position: 'sticky', top: 0, backgroundColor: '#0D1F2D' }}>
+
+      <div style={{ padding: '16px', borderBottom: '1px solid #1A2E3D', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#1565D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <LogoIcon />
           </div>
-          <span className="text-base font-semibold leading-tight" style={{ color: '#00236F' }}>
-            Construction<br />Manager
-          </span>
+          <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.25 }}>Construction<br />Manager</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           {messagesHref && <MessagesButton href={messagesHref} />}
           <NotificationBell unreadCount={unreadCount} href={notificationsHref} />
         </div>
       </div>
-      <div className="border-b" style={{ borderColor: '#EEEEEE' }} />
 
       {backButton && (
-        <div className="px-3 pt-3 pb-1">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium"
-            style={{ color: '#666666', background: 'none', border: 'none', cursor: 'pointer' }}
-          >
+        <div style={{ padding: '8px 12px 0' }}>
+          <button type="button" onClick={() => router.back()}
+            className="sb-item"
+            style={{ color: '#8FA3B3' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
             </svg>
@@ -85,35 +82,44 @@ function BaseSidebar({ navItems, backButton, messagesHref, notificationsHref }: 
         </div>
       )}
 
-      <nav className="flex-1 py-3 space-y-0.5">
-        {navItems.map((item) => {
+      <nav style={{ flex: 1, overflowY: 'auto', paddingBottom: '8px' }}>
+        {navItems.flatMap((item, i) => {
           const active = navIsActive(pathname, item.href, item.exact)
-          return (
-            <Link key={item.href} href={item.href}
-              className="flex items-center gap-3 mx-2 px-4 py-2.5 rounded-lg"
-              style={{ backgroundColor: active ? '#E4E9FA' : 'transparent', color: active ? '#00236F' : '#666666' }}
-              aria-current={active ? 'page' : undefined}>
+          const showSection = item.section !== undefined && (i === 0 || item.section !== navItems[i - 1].section)
+          const nodes: React.ReactNode[] = []
+          if (showSection) {
+            nodes.push(
+              <p key={`sec-${item.section}-${i}`} style={{ padding: '20px 16px 4px', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A6072', margin: 0 }}>
+                {item.section}
+              </p>
+            )
+          }
+          nodes.push(
+            <Link key={item.href} href={item.href} className={`sb-item${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined}>
               {item.icon(active)}
-              <span className="text-sm font-medium">{item.label}</span>
+              <span>{item.label}</span>
             </Link>
           )
+          return nodes
         })}
       </nav>
-      <div className="border-t" style={{ borderColor: '#EEEEEE' }}>
-        <div className="px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#E4E9FA' }}>
-              <span className="text-xs font-bold" style={{ color: '#00236F' }}>{initials}</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate" style={{ color: '#111111' }}>{profile?.full_name ?? 'Loading...'}</p>
-              <p className="text-xs mt-0.5" style={{ color: '#666666' }}>{profile?.role ? formatRole(profile.role) : ''}</p>
-            </div>
+
+      <div style={{ borderTop: '1px solid #1A2E3D', padding: '12px 16px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#1565D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#FFFFFF' }}>{initials}</span>
           </div>
-          <button type="button" onClick={signOut} className="mt-3 w-full text-left text-xs font-medium" style={{ color: '#666666' }}>
-            Sign out
-          </button>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ fontSize: '13px', fontWeight: 500, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+              {profile?.full_name ?? 'Loading...'}
+            </p>
+            <p style={{ fontSize: '11px', color: '#8FA3B3', margin: 0 }}>{profile?.role ? formatRole(profile.role) : ''}</p>
+          </div>
         </div>
+        <button type="button" onClick={signOut}
+          style={{ marginTop: '8px', background: 'none', border: 'none', padding: 0, fontSize: '12px', color: '#8FA3B3', cursor: 'pointer' }}>
+          Sign out
+        </button>
       </div>
     </aside>
   )
@@ -122,17 +128,19 @@ function BaseSidebar({ navItems, backButton, messagesHref, notificationsHref }: 
 function BaseBottomNav({ navItems }: { navItems: NavItem[] }) {
   const pathname = usePathname()
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-50 md:hidden" style={{ borderColor: '#EEEEEE', borderTopWidth: '1px' }} aria-label="Main navigation">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden safe-bottom"
+      style={{ backgroundColor: '#0D1F2D', borderTop: '1px solid #1A2E3D' }}
+      aria-label="Main navigation">
       <div className="flex items-center justify-around px-2 h-16">
         {navItems.slice(0, 5).map((item) => {
           const active = navIsActive(pathname, item.href, item.exact)
           return (
             <Link key={item.href} href={item.href}
               className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full"
-              style={{ color: active ? '#00236F' : '#BBBBBB' }}
+              style={{ color: active ? '#FFFFFF' : '#4A6072' }}
               aria-current={active ? 'page' : undefined}>
               {item.icon(active)}
-              <span className="text-[10px] font-medium" style={{ color: active ? '#00236F' : '#BBBBBB' }}>{item.label}</span>
+              <span className="text-[10px] font-medium" style={{ color: active ? '#FFFFFF' : '#4A6072' }}>{item.label}</span>
             </Link>
           )
         })}
@@ -144,7 +152,7 @@ function BaseBottomNav({ navItems }: { navItems: NavItem[] }) {
 export default function BaseLayout({ children, navItems, backButton, messagesHref, notificationsHref }: BaseLayoutProps) {
   const overflowItems = navItems.slice(5).map((item) => ({ label: item.label, href: item.href }))
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F5F6FA' }}>
+    <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F4F6F8' }}>
       <MobileTopBar backButton={backButton} messagesHref={messagesHref} notificationsHref={notificationsHref} overflowItems={overflowItems} />
       <BaseSidebar navItems={navItems} backButton={backButton} messagesHref={messagesHref} notificationsHref={notificationsHref} />
       <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">{children}</main>

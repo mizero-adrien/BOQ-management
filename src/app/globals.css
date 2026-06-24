@@ -3,24 +3,35 @@
 @theme {
   --font-sans: var(--font-inter), system-ui, sans-serif;
 
-  --color-primary: #00236F;
-  --color-primary-dark: #001A52;
-  --color-primary-light: #0A3080;
+  --color-primary:       #1565D8;
+  --color-primary-dark:  #0D47A1;
+  --color-primary-navy:  #00236F;
 
-  --color-accent: #778EDE;
-  --color-accent-light: #E4E9FA;
-  --color-accent-dark: #5670C4;
+  --color-accent:        #778EDE;
+  --color-accent-light:  #E4E9FA;
 
-  --color-surface: #F5F6FA;
-  --color-border: #EEEEEE;
-  --color-muted: #666666;
-  --color-faint: #BBBBBB;
+  --color-surface:       #F4F6F8;
+  --color-border:        #DDE3E8;
+  --color-border-input:  #CDD6DC;
+  --color-muted:         #5C7080;
+  --color-faint:         #8FA3B3;
 
-  --radius: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+  --color-sidebar-bg:     #0D1F2D;
+  --color-sidebar-active: #1565D8;
+  --color-sidebar-hover:  #162535;
+  --color-sidebar-border: #1A2E3D;
+  --color-sidebar-text:   #8FA3B3;
+  --color-sidebar-muted:  #4A6072;
 
+  --color-error:   #E24B4A;
+  --color-success: #5DCAA5;
+  --color-warning: #EF9F27;
+
+  --radius:    6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
 }
 
 @utility text-2xs {
@@ -40,22 +51,132 @@
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: 13px;
+    color: #1A2332;
+    background-color: #F4F6F8;
   }
 
   input,
   textarea,
-  select {
+  select,
+  button {
     font-family: inherit;
+    font-size: inherit;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    background-color: #1565D8;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: 6px;
+    text-align: center;
+    transition: opacity 0.15s;
+    display: inline-block;
+    width: 100%;
   }
 
-  button {
+  .btn-primary:active {
+    opacity: 0.8;
+  }
+
+  .btn-outline {
+    background-color: #FFFFFF;
+    color: #2C3E50;
+    border: 1px solid #CDD6DC;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: 6px;
+    text-align: center;
+    transition: opacity 0.15s;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .btn-outline:active {
+    opacity: 0.8;
+  }
+
+  .input-field {
+    background-color: #F4F6F8;
+    border: 1px solid #CDD6DC;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: #1A2332;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .input-field:focus {
+    border-color: #1565D8;
+  }
+
+  .input-field::placeholder {
+    color: #8FA3B3;
+  }
+
+  .card {
+    background-color: #FFFFFF;
+    border: 0.5px solid #DDE3E8;
+    border-radius: 8px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #4A6072;
+  }
+
+  /* Sidebar nav item — handles hover and active via CSS */
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    margin: 1px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #8FA3B3;
+    text-decoration: none;
+    transition: background-color 0.12s, color 0.12s;
+    width: calc(100% - 16px);
     cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  .sb-item:hover {
+    background-color: #162535;
+    color: #FFFFFF;
+  }
+
+  .sb-item.active {
+    background-color: #1565D8;
+    color: #FFFFFF;
+    font-weight: 500;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
   }
 }
 
 @keyframes spin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
 }
 
 @keyframes step-in-right {
@@ -75,34 +196,4 @@
   45%       { transform: rotate(8deg); }
   60%       { transform: rotate(-5deg); }
   75%       { transform: rotate(3deg); }
-}
-
-@layer components {
-  .btn-primary {
-    @apply bg-primary text-white font-semibold text-sm py-3 px-4 rounded-lg w-full text-center transition-opacity active:opacity-80;
-  }
-
-  .btn-outline {
-    @apply bg-white text-primary font-semibold text-sm py-3 px-4 rounded-lg w-full text-center border border-primary transition-opacity active:opacity-80;
-  }
-
-  .input-field {
-    @apply bg-surface border border-border rounded-lg px-3 py-2.5 text-sm text-gray-900 w-full outline-none focus:border-primary transition-colors placeholder:text-faint;
-  }
-
-  .card {
-    @apply bg-white rounded-lg border border-border;
-  }
-
-  .section-label {
-    @apply text-2xs text-faint uppercase tracking-wider font-semibold;
-  }
-
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
-  }
 }

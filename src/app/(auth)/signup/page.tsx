@@ -89,13 +89,13 @@ function SignupForm() {
       <div className="flex flex-col items-center mb-8">
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-          style={{ backgroundColor: '#00236F' }}
+          style={{ backgroundColor: '#1565D8' }}
         >
           <BuildingIcon />
         </div>
         <h1
           className="text-2xl font-semibold mb-1"
-          style={{ color: '#00236F' }}
+          style={{ color: '#1A2332' }}
         >
           Create account
         </h1>
@@ -143,10 +143,10 @@ function SignupForm() {
             autoComplete="name"
             className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
             style={{
-              backgroundColor: '#F5F6FA',
+              backgroundColor: '#F4F6F8',
               border: errors.full_name
                 ? '1.5px solid #E24B4A'
-                : '1px solid #EEEEEE',
+                : '1px solid #CDD6DC',
               color: '#111111',
             }}
             {...register('full_name')}
@@ -172,10 +172,10 @@ function SignupForm() {
             autoCapitalize="none"
             className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
             style={{
-              backgroundColor: '#F5F6FA',
+              backgroundColor: '#F4F6F8',
               border: errors.email
                 ? '1.5px solid #E24B4A'
-                : '1px solid #EEEEEE',
+                : '1px solid #CDD6DC',
               color: '#111111',
             }}
             {...register('email')}
@@ -201,10 +201,10 @@ function SignupForm() {
               autoComplete="new-password"
               className="w-full px-4 pr-10 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
-                backgroundColor: '#F5F6FA',
+                backgroundColor: '#F4F6F8',
                 border: errors.password
                   ? '1.5px solid #E24B4A'
-                  : '1px solid #EEEEEE',
+                  : '1px solid #CDD6DC',
                 color: '#111111',
               }}
               {...register('password')}
@@ -239,10 +239,10 @@ function SignupForm() {
               autoComplete="new-password"
               className="w-full px-4 pr-10 py-3 text-sm rounded-lg outline-none transition-colors"
               style={{
-                backgroundColor: '#F5F6FA',
+                backgroundColor: '#F4F6F8',
                 border: errors.confirm_password
                   ? '1.5px solid #E24B4A'
-                  : '1px solid #EEEEEE',
+                  : '1px solid #CDD6DC',
                 color: '#111111',
               }}
               {...register('confirm_password')}
@@ -266,8 +266,8 @@ function SignupForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-          style={{ backgroundColor: '#00236F' }}
+          className="w-full py-3.5 rounded-md text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+          style={{ backgroundColor: '#1565D8' }}
         >
           {isSubmitting ? 'Creating account...' : 'Create account'}
         </button>
@@ -279,7 +279,7 @@ function SignupForm() {
         <Link
           href="/login"
           className="font-semibold"
-          style={{ color: '#00236F' }}
+          style={{ color: '#1565D8' }}
         >
           Sign in
         </Link>
@@ -294,7 +294,7 @@ export default function SignupPage() {
     <Suspense
       fallback={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#00236F', animation: 'spin 0.8s linear infinite' }} />
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#1565D8', animation: 'spin 0.8s linear infinite' }} />
         </div>
       }
     >

@@ -31,7 +31,7 @@ export default function MobileTopBar({ backButton, messagesHref, notificationsHr
     <>
       <header
         className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 md:hidden bg-white border-b"
-        style={{ height: '56px', borderColor: '#EEEEEE' }}
+        style={{ height: '56px', borderColor: '#DDE3E8' }}
       >
         <div className="flex items-center gap-1">
           {backButton && (
@@ -58,7 +58,7 @@ export default function MobileTopBar({ backButton, messagesHref, notificationsHr
           <Link href="/redirect" className="flex items-center gap-2.5">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: '#00236F' }}
+              style={{ backgroundColor: '#1565D8' }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -67,7 +67,7 @@ export default function MobileTopBar({ backButton, messagesHref, notificationsHr
                 <path d="M9 11h1" /><path d="M14 11h1" />
               </svg>
             </div>
-            <span className="text-sm font-semibold" style={{ color: '#00236F' }}>Construction Manager</span>
+            <span className="text-sm font-semibold" style={{ color: '#1565D8' }}>Construction Manager</span>
           </Link>
         </div>
 
@@ -80,7 +80,7 @@ export default function MobileTopBar({ backButton, messagesHref, notificationsHr
               onClick={() => setDrawerOpen(true)}
               aria-label="More navigation"
               className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', backgroundColor: '#F5F6FA' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', backgroundColor: '#F4F6F8' }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -117,7 +117,7 @@ export default function MobileTopBar({ backButton, messagesHref, notificationsHr
             {/* Drawer header */}
             <div
               className="flex items-center justify-between px-5 flex-shrink-0"
-              style={{ height: '56px', borderBottom: '1px solid #EEEEEE' }}
+              style={{ height: '56px', borderBottom: '1px solid #DDE3E8' }}
             >
               <span style={{ fontSize: '14px', fontWeight: 700, color: '#111111' }}>More</span>
               <button
@@ -125,7 +125,7 @@ export default function MobileTopBar({ backButton, messagesHref, notificationsHr
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close menu"
                 className="w-8 h-8 flex items-center justify-center rounded-full"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', backgroundColor: '#F5F6FA' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', backgroundColor: '#F4F6F8' }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -145,15 +145,15 @@ export default function MobileTopBar({ backButton, messagesHref, notificationsHr
                     onClick={() => setDrawerOpen(false)}
                     className="flex items-center justify-between px-5 py-3.5"
                     style={{
-                      backgroundColor: isActive ? '#E4E9FA' : 'transparent',
-                      borderBottom: '1px solid #EEEEEE',
+                      backgroundColor: isActive ? '#EEF3FB' : 'transparent',
+                      borderBottom: '1px solid #DDE3E8',
                       textDecoration: 'none',
                     }}
                   >
-                    <span style={{ fontSize: '14px', fontWeight: isActive ? 600 : 500, color: isActive ? '#00236F' : '#111111' }}>
+                    <span style={{ fontSize: '14px', fontWeight: isActive ? 600 : 500, color: isActive ? '#1565D8' : '#111111' }}>
                       {item.label}
                     </span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={isActive ? '#00236F' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={isActive ? '#1565D8' : '#BBBBBB'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="m9 18 6-6-6-6" />
                     </svg>
                   </Link>
