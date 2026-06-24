@@ -10,6 +10,7 @@ import AddExistingUserTab from '@/components/pm/team/AddExistingUserTab'
 import TeamMembersList from '@/components/pm/team/TeamMembersList'
 import NoProjectsEmptyState from '@/components/pm/NoProjectsEmptyState'
 import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
+import PMTopBar from '@/components/pm/PMTopBar'
 
 type TabId = 'add' | 'invite'
 
@@ -38,17 +39,33 @@ export default function TeamPage() {
     )
   }
 
+  function scrollToInvite() {
+    const el = document.getElementById('team-invite-section')
+    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const InviteIcon = (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <line x1="19" y1="8" x2="19" y2="14" />
+      <line x1="22" y1="11" x2="16" y2="11" />
+    </svg>
+  )
+
   return (
-    <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px' }}>
+    <>
+      <PMTopBar
+        title="Team"
+        secondaryAction={{
+          label: 'Invite team member',
+          onClick: scrollToInvite,
+          icon: InviteIcon,
+        }}
+      />
+      <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#111111', marginBottom: '4px' }}>
-            Team
-          </h1>
-          <p style={{ fontSize: '14px', color: '#666666' }}>
-            Manage project members
-          </p>
-        </div>
+        <div id="team-invite-section">
 
         <div
           style={{
@@ -116,7 +133,9 @@ export default function TeamPage() {
         </div>
 
         <TeamMembersList projects={projects} loading={projectsLoading} />
+        </div>
       </div>
     </div>
+    </>
   )
 }

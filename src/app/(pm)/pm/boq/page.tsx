@@ -15,6 +15,7 @@ import NoProjectsBOQCard from '@/components/pm/boq/NoProjectsBOQCard'
 import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
 import { toast } from '@/lib/toast'
 import AIQuantityCalculator, { type CalculatedItem } from '@/components/pm/boq/AIQuantityCalculator'
+import PMTopBar from '@/components/pm/PMTopBar'
 
 export default function PMBOQPage() {
   const { projects, loading: projectsLoading, error: projectsError } = usePMProjects()
@@ -100,13 +101,11 @@ export default function PMBOQPage() {
   }
 
   return (
-    <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-      {/* Header — always visible */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="font-semibold mb-1" style={{ color: '#111111', fontSize: '24px' }}>Bill of Quantities</h1>
-          <p className="text-sm" style={{ color: '#666666' }}>Manage and track project budgets</p>
-        </div>
+    <>
+      <PMTopBar title="Bill of Quantities" />
+      <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+      {/* Action buttons */}
+      <div className="flex items-center justify-end mb-6">
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             type="button"
@@ -230,6 +229,7 @@ export default function PMBOQPage() {
       {showImport && (
         <ImportBOQModal onImport={handleImport} onClose={() => setShowImport(false)} />
       )}
-    </div>
+      </div>
+    </>
   )
 }

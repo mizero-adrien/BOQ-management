@@ -4,9 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useProfile } from '@/hooks/useProfile'
 import { useSignOut } from '@/hooks/useSignOut'
-import { useNotifications } from '@/hooks/useNotifications'
-import NotificationBell from '@/components/shared/NotificationBell'
-import MessagesButton from '@/components/shared/MessagesButton'
 
 type SectionItem = { label: string; href: string; Icon: (p: { active: boolean }) => React.ReactNode }
 
@@ -50,7 +47,6 @@ export default function PMSidebar() {
   const pathname = usePathname()
   const { profile } = useProfile()
   const { signOut } = useSignOut()
-  const { unreadCount } = useNotifications()
 
   const initials = profile?.full_name?.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() ?? ''
 
@@ -67,10 +63,6 @@ export default function PMSidebar() {
             </svg>
           </div>
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.25 }}>Construction<br />Manager</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <MessagesButton href="/pm/messages" />
-          <NotificationBell unreadCount={unreadCount} href="/pm/notifications" />
         </div>
       </div>
 
