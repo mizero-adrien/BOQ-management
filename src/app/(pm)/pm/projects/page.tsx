@@ -55,15 +55,25 @@ export default function PMProjectsPage() {
         searchPlaceholder="Search projects"
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
-        primaryAction={{
-          label: 'New project',
-          onClick: () => router.push('/pm/projects/new'),
-          icon: PlusIcon,
-        }}
       />
 
       <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px 20px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+
+          {/* Action row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '16px' }}>
+            <button
+              type="button"
+              onClick={() => router.push('/pm/projects/new')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 14px', backgroundColor: '#1565D8', color: '#FFFFFF',
+                border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+              }}>
+              {PlusIcon}
+              New project
+            </button>
+          </div>
 
           {/* Status filter tabs */}
           <div className="flex gap-2 overflow-x-auto pb-1 mb-6" style={{ scrollbarWidth: 'none' }}>
@@ -71,8 +81,8 @@ export default function PMProjectsPage() {
               <button key={value} type="button" onClick={() => setFilter(value)}
                 className="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium"
                 style={filter === value
-                  ? { backgroundColor: '#00236F', color: '#FFFFFF' }
-                  : { backgroundColor: '#FFFFFF', color: '#666666', border: '1px solid #EEEEEE' }}>
+                  ? { backgroundColor: '#1565D8', color: '#FFFFFF' }
+                  : { backgroundColor: '#FFFFFF', color: '#666666', border: '1px solid #DDE3E8' }}>
                 {label}
               </button>
             ))}
@@ -84,12 +94,12 @@ export default function PMProjectsPage() {
               {[1, 2, 3, 4].map((i) => <SkeletonCard key={i} height="200px" />)}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="bg-white rounded-xl p-12 text-center" style={{ border: '1px solid #EEEEEE' }}>
-              <p className="font-semibold mb-2" style={{ color: '#111111', fontSize: '16px' }}>No projects found</p>
-              <p className="text-sm mb-5" style={{ color: '#666666' }}>{emptyMsg}</p>
+            <div className="bg-white rounded-xl p-12 text-center" style={{ border: '1px solid #DDE3E8' }}>
+              <p className="font-semibold mb-2" style={{ color: '#1A2332', fontSize: '16px' }}>No projects found</p>
+              <p className="text-sm mb-5" style={{ color: '#8FA3B3' }}>{emptyMsg}</p>
               {filter === 'all' && !searchQuery.trim() && (
                 <Link href="/pm/projects/new" className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white inline-block"
-                  style={{ backgroundColor: '#00236F' }}>
+                  style={{ backgroundColor: '#1565D8' }}>
                   Create first project
                 </Link>
               )}

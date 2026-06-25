@@ -13,6 +13,7 @@ import ReportDueBanner from '@/components/engineer/ReportDueBanner'
 import DashboardStatCard from '@/components/engineer/DashboardStatCard'
 import TaskItem from '@/components/engineer/TaskItem'
 import { DashboardSkeleton, TasksSkeleton } from '@/components/engineer/DashboardSkeleton'
+import AppHeader from '@/components/shared/AppHeader'
 
 export default function DashboardPage() {
   const { profile, loading: profileLoading } = useProfile()
@@ -69,26 +70,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F5F6FA' }}>
-      <div className="bg-white px-4 pt-4 pb-4 border-b" style={{ borderColor: '#EEEEEE' }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#BBBBBB' }}>
-              {today}
-            </p>
-            <h1 className="text-lg font-semibold mt-0.5" style={{ color: '#111111' }}>
-              {greeting}, {firstName}
-            </h1>
-          </div>
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center md:hidden"
-            style={{ backgroundColor: '#E4E9FA' }}
-          >
-            <span className="text-xs font-bold" style={{ color: '#00236F' }}>{initials}</span>
-          </div>
-        </div>
-      </div>
-
+    <>
+      <AppHeader
+        title={`${greeting}, ${firstName}`}
+        subtitle={today}
+        messagesHref="/messages"
+        notificationsHref="/notifications"
+        profileHref="/profile"
+        settingsHref="/profile"
+      />
+      <div className="min-h-screen" style={{ backgroundColor: '#F4F6F8' }}>
       <div className="px-4 py-4 space-y-4">
         <ReportDueBanner />
 
@@ -141,6 +132,7 @@ export default function DashboardPage() {
           Submit today's report
         </Link>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

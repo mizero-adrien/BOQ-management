@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useProfile } from '@/hooks/useProfile'
-import { useSignOut } from '@/hooks/useSignOut'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
 import MessagesButton from '@/components/shared/MessagesButton'
@@ -39,12 +37,7 @@ const navSections: { label: string; items: SectionItem[] }[] = [
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { profile } = useProfile()
-  const { signOut } = useSignOut()
   const { unreadCount } = useNotifications()
-
-  const initials = profile?.full_name?.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() ?? ''
-  const roleLabel = profile?.role ? roleDisplayName(profile.role) : ''
 
   return (
     <aside className="hidden md:flex md:flex-col md:flex-shrink-0"
@@ -66,7 +59,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav style={{ flex: 1, overflowY: 'auto', paddingBottom: '8px' }}>
+      <nav style={{ flex: 1, overflowY: 'auto', paddingBottom: '16px' }}>
         {navSections.map((section) => (
           <div key={section.label}>
             <p style={{ padding: '20px 16px 4px', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A6072', margin: 0 }}>
@@ -84,35 +77,6 @@ export default function Sidebar() {
           </div>
         ))}
       </nav>
-
-      <div style={{ borderTop: '1px solid #1A2E3D', padding: '12px 16px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#1565D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: '#FFFFFF' }}>{initials}</span>
-          </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontSize: '13px', fontWeight: 500, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
-              {profile?.full_name ?? 'Loading...'}
-            </p>
-            <p style={{ fontSize: '11px', color: '#8FA3B3', margin: 0 }}>{roleLabel}</p>
-          </div>
-        </div>
-        <button type="button" onClick={signOut}
-          style={{ marginTop: '8px', background: 'none', border: 'none', padding: 0, fontSize: '12px', color: '#8FA3B3', cursor: 'pointer' }}>
-          Sign out
-        </button>
-      </div>
     </aside>
   )
-}
-
-function roleDisplayName(role: string): string {
-  const map: Record<string, string> = {
-    engineer: 'Site Engineer',
-    pm: 'Project Manager',
-    foreman: 'Foreman',
-    qs: 'Quantity Surveyor',
-    storekeeper: 'Storekeeper',
-  }
-  return map[role] ?? role
 }

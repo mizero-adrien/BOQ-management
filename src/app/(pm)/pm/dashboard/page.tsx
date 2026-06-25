@@ -17,7 +17,7 @@ import MobileProfileCard from '@/components/pm/MobileProfileCard'
 import { EmptyCard, InfoIcon, XSmallIcon } from '@/components/shared/DashboardUtils'
 import { SkeletonStats, SkeletonCard, SkeletonTable } from '@/components/shared/Skeleton'
 import ProcurementWidget from '@/components/pm/ProcurementWidget'
-import PMTopBar from '@/components/pm/PMTopBar'
+import AppHeader from '@/components/shared/AppHeader'
 
 const PlusIcon = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -60,25 +60,45 @@ export default function PMDashboardPage() {
 
   return (
     <>
-      <PMTopBar
+      <AppHeader
         title="Dashboard"
         subtitle={today}
         searchPlaceholder="Search projects or engineers..."
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
-        primaryAction={{
-          label: 'New project',
-          onClick: () => router.push('/pm/projects/new'),
-          icon: PlusIcon,
-        }}
-        secondaryAction={{
-          label: 'Invite team',
-          onClick: () => router.push('/pm/team'),
-          icon: PersonPlusIcon,
-        }}
+        messagesHref="/pm/messages"
+        notificationsHref="/pm/notifications"
+        profileHref="/pm/profile"
+        settingsHref="/pm/settings"
       />
 
       <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '900px', margin: '0 auto' }}>
+
+        {/* Action buttons row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '20px', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={() => router.push('/pm/projects/new')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '8px 14px', backgroundColor: '#1565D8', color: '#FFFFFF',
+              border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+            }}>
+            {PlusIcon}
+            New project
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/pm/team')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '8px 14px', backgroundColor: '#FFFFFF', color: '#1A2332',
+              border: '1px solid #DDE3E8', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+            }}>
+            {PersonPlusIcon}
+            Invite team
+          </button>
+        </div>
         {hasDemo && !demoBannerDismissed && (
           <div
             className="flex items-start gap-3 rounded-xl px-4 py-3 mb-5"

@@ -9,6 +9,7 @@ import { useMaterialLogs } from '@/hooks/useMaterialLogs'
 import BudgetCard from '@/components/qs/BudgetCard'
 import { formatDate, formatCurrency } from '@/lib/utils/index'
 import { SkeletonStats, SkeletonTable } from '@/components/shared/Skeleton'
+import AppHeader from '@/components/shared/AppHeader'
 
 function progressColor(pct: number) {
   if (pct > 90) return '#E24B4A'
@@ -32,11 +33,16 @@ export default function QSDashboardPage() {
   }
 
   return (
-    <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '900px', margin: '0 auto' }}>
-      <div className="mb-6">
-        <h1 className="font-semibold mb-0.5" style={{ color: '#111111', fontSize: '24px' }}>Cost Control Dashboard</h1>
-        <p className="text-sm" style={{ color: '#666666' }}>{project?.name} — {formatDate(new Date().toISOString())}</p>
-      </div>
+    <>
+      <AppHeader
+        title="Cost Control"
+        subtitle={project ? `${project.name} — ${formatDate(new Date().toISOString())}` : formatDate(new Date().toISOString())}
+        messagesHref="/qs/messages"
+        notificationsHref="/qs/notifications"
+        profileHref="/qs/me"
+        settingsHref="/qs/me"
+      />
+      <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '900px', margin: '0 auto' }}>
 
       {project && <BudgetCard projectName={project.name} sections={sections} />}
 
@@ -96,6 +102,7 @@ export default function QSDashboardPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }

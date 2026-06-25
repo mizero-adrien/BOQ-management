@@ -111,7 +111,7 @@ export default function PMBOQPage() {
             type="button"
             onClick={handleImportClick}
             className="hidden md:block px-3 py-2 rounded-lg text-xs font-medium"
-            style={{ border: '1px solid #00236F', color: '#00236F' }}
+            style={{ border: '1px solid #DDE3E8', color: '#1A2332', backgroundColor: '#FFFFFF' }}
           >
             Import PDF / Excel
           </button>
@@ -119,7 +119,7 @@ export default function PMBOQPage() {
             type="button"
             onClick={handleImportClick}
             className="md:hidden px-3 py-2 rounded-lg text-xs font-medium"
-            style={{ border: '1px solid #00236F', color: '#00236F' }}
+            style={{ border: '1px solid #DDE3E8', color: '#1A2332', backgroundColor: '#FFFFFF' }}
           >
             Import
           </button>
@@ -135,7 +135,7 @@ export default function PMBOQPage() {
             type="button"
             onClick={handleAddSectionClick}
             className="px-3 py-2 rounded-lg text-xs font-semibold text-white"
-            style={{ backgroundColor: '#00236F' }}
+            style={{ backgroundColor: '#1565D8' }}
           >
             Add section
           </button>

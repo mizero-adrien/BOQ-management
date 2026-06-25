@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useMaterialLogs } from '@/hooks/useMaterialLogs'
 import { formatDate } from '@/lib/utils/index'
+import AppHeader from '@/components/shared/AppHeader'
 
 function LogsEmptyState() {
   return (
@@ -153,13 +154,17 @@ export default function StorekeeperDashboardPage() {
   }
 
   return (
-    <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '24px 20px' }}>
+    <>
+      <AppHeader
+        title="Store Dashboard"
+        subtitle={project.name}
+        messagesHref="/storekeeper/messages"
+        notificationsHref="/storekeeper/notifications"
+        profileHref="/storekeeper/profile"
+        settingsHref="/storekeeper/profile"
+      />
+      <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '24px 20px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#111111', marginBottom: '4px' }}>Store Dashboard</h1>
-          <p style={{ fontSize: '14px', color: '#666666' }}>{project.name}</p>
-        </div>
 
         {/* Stock alerts */}
         <p style={{ fontSize: '11px', fontWeight: '600', color: '#BBBBBB', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>Stock Alerts</p>
@@ -225,6 +230,7 @@ export default function StorekeeperDashboardPage() {
         )}
 
       </div>
-    </div>
+      </div>
+    </>
   )
 }

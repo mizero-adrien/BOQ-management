@@ -9,6 +9,7 @@ import ProcurementStatCards from '@/components/procurement/ProcurementStatCards'
 import PendingApprovalsList from '@/components/procurement/PendingApprovalsList'
 import OverdueDeliveriesList from '@/components/procurement/OverdueDeliveriesList'
 import RecentProcurementActivity from '@/components/procurement/RecentProcurementActivity'
+import AppHeader from '@/components/shared/AppHeader'
 
 export default function ProcurementDashboardPage() {
   const { requests, loading: reqLoading } = usePurchaseRequests()
@@ -32,16 +33,17 @@ export default function ProcurementDashboardPage() {
   }
 
   return (
-    <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', padding: '32px 20px' }}>
+    <>
+      <AppHeader
+        title="Procurement"
+        subtitle={new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        messagesHref="/procurement/messages"
+        notificationsHref="/procurement/notifications"
+        profileHref="/procurement/profile"
+        settingsHref="/procurement/profile"
+      />
+      <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px 20px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#111111', marginBottom: '4px' }}>
-            Procurement
-          </h1>
-          <p style={{ fontSize: '14px', color: '#666666' }}>
-            {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
 
         <ProcurementStatCards
           totalRequests={requests.length}
@@ -76,6 +78,7 @@ export default function ProcurementDashboardPage() {
           <RecentProcurementActivity requests={requests.slice(0, 8)} />
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useProfile } from '@/hooks/useProfile'
-import { useSignOut } from '@/hooks/useSignOut'
 
 type SectionItem = { label: string; href: string; Icon: (p: { active: boolean }) => React.ReactNode }
 
@@ -45,10 +43,6 @@ const navSections: { label: string; items: SectionItem[] }[] = [
 
 export default function PMSidebar() {
   const pathname = usePathname()
-  const { profile } = useProfile()
-  const { signOut } = useSignOut()
-
-  const initials = profile?.full_name?.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() ?? ''
 
   return (
     <aside className="hidden md:flex md:flex-col md:flex-shrink-0"
@@ -84,24 +78,6 @@ export default function PMSidebar() {
           </div>
         ))}
       </nav>
-
-      <div style={{ borderTop: '1px solid #1A2E3D', padding: '12px 16px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#1565D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: '#FFFFFF' }}>{initials}</span>
-          </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontSize: '13px', fontWeight: 500, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
-              {profile?.full_name ?? 'Loading...'}
-            </p>
-            <p style={{ fontSize: '11px', color: '#8FA3B3', margin: 0 }}>Project Manager</p>
-          </div>
-        </div>
-        <button type="button" onClick={signOut}
-          style={{ marginTop: '8px', background: 'none', border: 'none', padding: 0, fontSize: '12px', color: '#8FA3B3', cursor: 'pointer' }}>
-          Sign out
-        </button>
-      </div>
     </aside>
   )
 }

@@ -3,22 +3,31 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
+import ProfileDropdown from './ProfileDropdown'
 
-interface PMTopBarProps {
+export interface AppHeaderProps {
   title: string
   subtitle?: string
   searchPlaceholder?: string
   searchValue?: string
   onSearchChange?: (value: string) => void
+  messagesHref: string
+  notificationsHref: string
+  profileHref: string
+  settingsHref: string
 }
 
-export default function PMTopBar({
+export default function AppHeader({
   title,
   subtitle,
   searchPlaceholder,
   searchValue,
   onSearchChange,
-}: PMTopBarProps) {
+  messagesHref,
+  notificationsHref,
+  profileHref,
+  settingsHref,
+}: AppHeaderProps) {
   const { unreadCount } = useNotifications()
   const [searchFocused, setSearchFocused] = useState(false)
 
@@ -28,11 +37,13 @@ export default function PMTopBar({
       padding: '0 24px', height: '56px', display: 'flex',
       alignItems: 'center', gap: '12px', position: 'sticky', top: 0, zIndex: 10,
     }}>
+      {/* Left: title + subtitle */}
       <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
         <span style={{ fontSize: '18px', fontWeight: 600, color: '#1A2332', lineHeight: 1.2 }}>{title}</span>
         {subtitle && <span style={{ fontSize: '11px', color: '#8FA3B3', lineHeight: 1.4 }}>{subtitle}</span>}
       </div>
 
+      {/* Middle: search — desktop only */}
       {searchPlaceholder && onSearchChange && (
         <div className="hidden md:block" style={{ flex: 1, maxWidth: '400px', margin: '0 4px' }}>
           <div style={{ position: 'relative' }}>
@@ -59,14 +70,15 @@ export default function PMTopBar({
         </div>
       )}
 
+      {/* Right: icons + avatar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
-        <Link href="/pm/messages" className="pm-top-icon-btn hidden md:flex" aria-label="Messages">
+        <Link href={messagesHref} className="pm-top-icon-btn hidden md:flex" aria-label="Messages">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </Link>
-        <Link href="/pm/notifications" className="pm-top-icon-btn hidden md:flex" aria-label="Notifications"
+        <Link href={notificationsHref} className="pm-top-icon-btn hidden md:flex" aria-label="Notifications"
           style={{ position: 'relative' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -80,6 +92,8 @@ export default function PMTopBar({
             }} />
           )}
         </Link>
+        <div className="hidden md:block" style={{ width: '1px', height: '20px', backgroundColor: '#DDE3E8', margin: '0 2px' }} />
+        <ProfileDropdown profileHref={profileHref} settingsHref={settingsHref} />
       </div>
     </header>
   )

@@ -55,16 +55,25 @@ export default function TeamPage() {
 
   return (
     <>
-      <PMTopBar
-        title="Team"
-        secondaryAction={{
-          label: 'Invite team member',
-          onClick: scrollToInvite,
-          icon: InviteIcon,
-        }}
-      />
+      <PMTopBar title="Team" />
       <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+
+        {/* Action row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '20px' }}>
+          <button
+            type="button"
+            onClick={scrollToInvite}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '8px 14px', backgroundColor: '#FFFFFF', color: '#1A2332',
+              border: '1px solid #DDE3E8', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+            }}>
+            {InviteIcon}
+            Invite team member
+          </button>
+        </div>
+
         <div id="team-invite-section">
 
         <div

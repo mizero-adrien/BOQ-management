@@ -11,6 +11,7 @@ import { useProjectTasks } from '@/hooks/useProjectTasks'
 import { formatDate, formatCurrency } from '@/lib/utils/index'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonStats, SkeletonTable } from '@/components/shared/Skeleton'
+import AppHeader from '@/components/shared/AppHeader'
 
 function greeting() {
   const h = new Date().getHours()
@@ -69,13 +70,16 @@ export default function ForemanDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F5F6FA' }}>
-      <div className="bg-white px-4 pt-4 pb-4 border-b" style={{ borderColor: '#EEEEEE' }}>
-        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#BBBBBB' }}>{today}</p>
-        <h1 className="text-lg font-semibold mt-0.5" style={{ color: '#111111' }}>{greeting()}, {firstName}</h1>
-        {project && <p className="text-xs mt-0.5" style={{ color: '#666666' }}>{project.name}</p>}
-      </div>
-
+    <>
+      <AppHeader
+        title={`${greeting()}, ${firstName}`}
+        subtitle={project ? project.name : today}
+        messagesHref="/foreman/messages"
+        notificationsHref="/foreman/notifications"
+        profileHref="/foreman/profile"
+        settingsHref="/foreman/profile"
+      />
+      <div className="min-h-screen" style={{ backgroundColor: '#F4F6F8' }}>
       <div className="px-4 py-4 space-y-4">
         {/* Crew summary */}
         <div className="bg-white rounded-xl p-5" style={{ border: '0.5px solid #EEEEEE' }}>
@@ -128,6 +132,7 @@ export default function ForemanDashboardPage() {
           Submit crew report
         </Link>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
