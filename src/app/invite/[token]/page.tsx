@@ -285,14 +285,18 @@ export default function InvitePage() {
         role: invitation.role,
       })
 
+      // Only updates profiles.role and auth metadata when user is pending
+      await supabase.rpc('update_user_role', {
+        target_user_id: currentUserId,
+        new_role: invitation.role,
+        target_project_id: invitation.project_id,
+      })
+
+      // Always set last_active_project_id to the accepted project
       await supabase
         .from('profiles')
-        .update({ role: invitation.role })
+        .update({ last_active_project_id: invitation.project_id })
         .eq('id', currentUserId)
-
-      await supabase.auth.updateUser({
-        data: { role: invitation.role, has_company: true },
-      })
 
       await supabase
         .from('invitations')
@@ -300,9 +304,10 @@ export default function InvitePage() {
         .eq('id', invitation.id)
 
       setPageState('success')
-      setTimeout(() => {
-        router.push(getRedirectPath(invitation.role))
-      }, 2000)
+      const dest = invitation.role === 'owner'
+        ? `/owner/${invitation.project_id}`
+        : getRedirectPath(invitation.role)
+      setTimeout(() => { router.push(dest) }, 2000)
     } catch (err) {
       console.error('Accept error:', err)
       toast.error('Something went wrong', 'Please try again.')

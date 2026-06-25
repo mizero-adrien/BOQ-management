@@ -4,12 +4,18 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Project } from '@/types/database'
 import { toast } from '@/lib/toast'
+import { formatRole } from '@/lib/utils/roleLabels'
 
 interface SearchResult {
   id: string
   full_name: string
   role: string
   avatar_url: string | null
+}
+
+interface ProjectMembership {
+  project_name: string
+  role: string
 }
 
 interface Props {
@@ -22,6 +28,7 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
   const [results, setResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
   const [selectedUser, setSelectedUser] = useState<SearchResult | null>(null)
+  const [memberships, setMemberships] = useState<ProjectMembership[]>([])
   const [selectedRole, setSelectedRole] = useState('engineer')
   const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id ?? '')
   const [adding, setAdding] = useState(false)
@@ -32,14 +39,29 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
     setSearching(true)
     try {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .rpc('search_users', { search_term: term })
+      const { data, error } = await supabase.rpc('search_users', { search_term: term })
       if (error) { console.error('Search error:', error.message); setResults([]); return }
       setResults((data ?? []).filter((u: SearchResult) => u.id !== currentUserId))
     } catch (err) {
       console.error('Search error:', err)
     } finally {
       setSearching(false)
+    }
+  }
+
+  async function handleSelectUser(user: SearchResult) {
+    setSelectedUser(user)
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('project_members')
+      .select('role, projects(name)')
+      .eq('user_id', user.id)
+    if (data) {
+      setMemberships(data.map((row: unknown) => {
+        const m = row as { role: string; projects: { name: string }[] | { name: string } | null }
+        const proj = Array.isArray(m.projects) ? m.projects[0] : m.projects
+        return { project_name: proj?.name ?? 'Unknown', role: m.role }
+      }))
     }
   }
 
@@ -71,7 +93,13 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
         { company_id: companyMember.company_id, user_id: selectedUser.id, role: selectedRole },
         { onConflict: 'company_id,user_id' }
       )
-      await supabase.rpc('update_user_role', { target_user_id: selectedUser.id, new_role: selectedRole })
+
+      // Pass target_project_id so update_user_role only updates profiles.role when pending
+      await supabase.rpc('update_user_role', {
+        target_user_id: selectedUser.id,
+        new_role: selectedRole,
+        target_project_id: selectedProjectId,
+      })
 
       const selectedProject = projects.find((p) => p.id === selectedProjectId)
       await supabase.from('notifications').insert({
@@ -85,6 +113,7 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
 
       toast.success('Team member added', selectedUser.full_name + ' has joined the project')
       setSelectedUser(null)
+      setMemberships([])
       setSearchTerm('')
       setResults([])
     } catch (err) {
@@ -119,20 +148,17 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
           {results.map((user) => (
             <div
               key={user.id}
-              onClick={() => setSelectedUser(user)}
+              onClick={() => handleSelectUser(user)}
               style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', borderBottom: '1px solid #F5F5F5', cursor: 'pointer' }}
             >
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#E4E9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: '#00236F', flexShrink: 0 }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#E4E9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: '#1565D8', flexShrink: 0 }}>
                 {user.full_name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
               </div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '14px', fontWeight: '500', color: '#111111' }}>{user.full_name}</p>
-                <p style={{ fontSize: '12px', color: '#BBBBBB' }}>{user.role}</p>
+                <p style={{ fontSize: '12px', color: '#BBBBBB' }}>{formatRole(user.role)}</p>
               </div>
-              <button
-                type="button"
-                style={{ padding: '6px 12px', backgroundColor: '#00236F', border: 'none', borderRadius: '6px', fontSize: '12px', color: '#fff', cursor: 'pointer' }}
-              >
+              <button type="button" style={{ padding: '6px 12px', backgroundColor: '#1565D8', border: 'none', borderRadius: '6px', fontSize: '12px', color: '#fff', cursor: 'pointer' }}>
                 Select
               </button>
             </div>
@@ -142,13 +168,22 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
 
       {selectedUser && (
         <div style={{ backgroundColor: '#E4E9FA', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
-          <p style={{ fontSize: '13px', fontWeight: '600', color: '#00236F', marginBottom: '10px' }}>
+          <p style={{ fontSize: '13px', fontWeight: '600', color: '#1565D8', marginBottom: '10px' }}>
             Adding: {selectedUser.full_name}
           </p>
 
+          {memberships.length > 0 && (
+            <div style={{ marginBottom: '10px', padding: '8px 10px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #C8D4F8' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: '#1565D8', marginBottom: '4px' }}>Current project memberships</p>
+              {memberships.map((m, i) => (
+                <p key={i} style={{ fontSize: '12px', color: '#666666' }}>{m.project_name} — {formatRole(m.role)}</p>
+              ))}
+            </div>
+          )}
+
           {projects.length > 1 && (
             <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#00236F', marginBottom: '4px' }}>Project</label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#1565D8', marginBottom: '4px' }}>Project</label>
               <select
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
@@ -162,7 +197,7 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
           )}
 
           <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#00236F', marginBottom: '4px' }}>Role on project</label>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#1565D8', marginBottom: '4px' }}>Role on project</label>
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
@@ -182,13 +217,13 @@ export default function AddExistingUserTab({ projects, currentUserId }: Props) {
               type="button"
               onClick={handleAdd}
               disabled={adding}
-              style={{ flex: 2, padding: '10px', backgroundColor: adding ? '#BBBBBB' : '#00236F', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#fff', cursor: adding ? 'not-allowed' : 'pointer' }}
+              style={{ flex: 2, padding: '10px', backgroundColor: adding ? '#BBBBBB' : '#1565D8', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', color: '#fff', cursor: adding ? 'not-allowed' : 'pointer' }}
             >
               {adding ? 'Adding...' : 'Confirm add'}
             </button>
             <button
               type="button"
-              onClick={() => { setSelectedUser(null); setSearchTerm(''); setResults([]) }}
+              onClick={() => { setSelectedUser(null); setMemberships([]); setSearchTerm(''); setResults([]) }}
               style={{ flex: 1, padding: '10px', backgroundColor: '#fff', border: '1px solid #EEEEEE', borderRadius: '8px', fontSize: '13px', color: '#666666', cursor: 'pointer' }}
             >
               Cancel

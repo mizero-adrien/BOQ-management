@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import ProjectSwitcher from '@/components/layout/ProjectSwitcher'
 
 type SectionItem = { label: string; href: string; Icon: (p: { active: boolean }) => React.ReactNode }
 
@@ -59,6 +60,8 @@ export default function PMSidebar() {
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.25 }}>Construction<br />Manager</span>
         </div>
       </div>
+
+      <ProjectSwitcher />
 
       <nav style={{ flex: 1, overflowY: 'auto', paddingBottom: '8px' }}>
         {navSections.map((section) => (

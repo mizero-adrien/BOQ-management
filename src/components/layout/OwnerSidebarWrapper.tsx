@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation'
 import BaseLayout, { type NavItem } from '@/components/layout/BaseLayout'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { ActiveProjectProvider } from '@/contexts/ActiveProjectContext'
 import PageErrorBoundary from '@/components/shared/PageErrorBoundary'
 import ToastContainer from '@/components/shared/ToastContainer'
 
@@ -33,8 +34,10 @@ export default function OwnerSidebarWrapper({ children }: { children: React.Reac
   return (
     <PageErrorBoundary>
       <NotificationProvider>
-        <BaseLayout navItems={navItems} messagesHref={`/owner/${projectId}/messages`} notificationsHref={`/owner/${projectId}/notifications`}>{children}</BaseLayout>
-        <ToastContainer />
+        <ActiveProjectProvider>
+          <BaseLayout navItems={navItems} messagesHref={`/owner/${projectId}/messages`} notificationsHref={`/owner/${projectId}/notifications`}>{children}</BaseLayout>
+          <ToastContainer />
+        </ActiveProjectProvider>
       </NotificationProvider>
     </PageErrorBoundary>
   )

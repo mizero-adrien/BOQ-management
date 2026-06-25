@@ -5,10 +5,16 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from '@/lib/toast'
 import { saveOfflineReport } from '@/lib/offlineReports'
-import type { Profile, Project } from '@/types/database'
+import type { Profile } from '@/types/database'
+
+interface ProjectFields {
+  id: string
+  name: string
+  pm_id: string
+}
 
 interface SubmitData {
-  project: Project
+  project: ProjectFields
   profile: Profile
   userId: string
   zoneId: string | null

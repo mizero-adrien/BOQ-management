@@ -2,6 +2,7 @@
 
 import BaseLayout, { type NavItem } from '@/components/layout/BaseLayout'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { ActiveProjectProvider } from '@/contexts/ActiveProjectContext'
 import PageErrorBoundary from '@/components/shared/PageErrorBoundary'
 import ToastContainer from '@/components/shared/ToastContainer'
 import OfflineSyncBanner from '@/components/shared/OfflineSyncBanner'
@@ -31,9 +32,11 @@ export default function ForemanLayout({ children }: { children: React.ReactNode 
   return (
     <PageErrorBoundary>
       <NotificationProvider>
-        <BaseLayout navItems={navItems} messagesHref="/foreman/messages" notificationsHref="/foreman/notifications">{children}</BaseLayout>
-        <OfflineSyncBanner />
-        <ToastContainer />
+        <ActiveProjectProvider>
+          <BaseLayout navItems={navItems} messagesHref="/foreman/messages" notificationsHref="/foreman/notifications">{children}</BaseLayout>
+          <OfflineSyncBanner />
+          <ToastContainer />
+        </ActiveProjectProvider>
       </NotificationProvider>
     </PageErrorBoundary>
   )

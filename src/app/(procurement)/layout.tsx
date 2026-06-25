@@ -2,6 +2,7 @@
 
 import BaseLayout, { type NavItem } from '@/components/layout/BaseLayout'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { ActiveProjectProvider } from '@/contexts/ActiveProjectContext'
 import PageErrorBoundary from '@/components/shared/PageErrorBoundary'
 import ToastContainer from '@/components/shared/ToastContainer'
 
@@ -30,8 +31,10 @@ export default function ProcurementLayout({ children }: { children: React.ReactN
   return (
     <PageErrorBoundary>
       <NotificationProvider>
-        <BaseLayout navItems={navItems} backButton={true} messagesHref="/procurement/messages" notificationsHref="/procurement/notifications">{children}</BaseLayout>
-        <ToastContainer />
+        <ActiveProjectProvider>
+          <BaseLayout navItems={navItems} backButton={true} messagesHref="/procurement/messages" notificationsHref="/procurement/notifications">{children}</BaseLayout>
+          <ToastContainer />
+        </ActiveProjectProvider>
       </NotificationProvider>
     </PageErrorBoundary>
   )

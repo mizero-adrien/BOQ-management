@@ -41,15 +41,15 @@ export async function middleware(request: NextRequest) {
     '/login',
     '/signup',
     '/forgot-password',
+    '/reset-password',
     '/share',
     '/redirect',
     '/invite',
     '/onboarding',
+    '/no-project',
   ]
 
-  const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route)
-  )
+  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
 
   if (!user && !isPublicRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -60,37 +60,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user) {
-    const userRole = (user.user_metadata?.role as string) ?? 'pending'
     const hasCompany = (user.user_metadata?.has_company as boolean) ?? false
+    const userRole = (user.user_metadata?.role as string) ?? 'pending'
 
-    if (!hasCompany && userRole === 'pending') {
-      if (!isPublicRoute && pathname !== '/onboarding') {
-        return NextResponse.redirect(new URL('/onboarding', request.url))
-      }
-    }
-
-    if (pathname.startsWith('/pm') && userRole !== 'pm') {
-      return NextResponse.redirect(new URL('/redirect', request.url))
-    }
-
-    if (pathname.startsWith('/foreman') && userRole !== 'foreman') {
-      return NextResponse.redirect(new URL('/redirect', request.url))
-    }
-
-    if (pathname.startsWith('/qs') && userRole !== 'qs') {
-      return NextResponse.redirect(new URL('/redirect', request.url))
-    }
-
-    if (pathname.startsWith('/storekeeper') && userRole !== 'storekeeper') {
-      return NextResponse.redirect(new URL('/redirect', request.url))
-    }
-
-    if (pathname.startsWith('/owner') && userRole !== 'owner' && userRole !== 'pm') {
-      return NextResponse.redirect(new URL('/redirect', request.url))
-    }
-
-    if (pathname.startsWith('/procurement') && userRole !== 'procurement' && userRole !== 'pm') {
-      return NextResponse.redirect(new URL('/redirect', request.url))
+    if (!hasCompany && userRole === 'pending' && !isPublicRoute && pathname !== '/onboarding') {
+      return NextResponse.redirect(new URL('/onboarding', request.url))
     }
   }
 

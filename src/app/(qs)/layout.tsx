@@ -2,6 +2,7 @@
 
 import BaseLayout, { type NavItem } from '@/components/layout/BaseLayout'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { ActiveProjectProvider } from '@/contexts/ActiveProjectContext'
 import PageErrorBoundary from '@/components/shared/PageErrorBoundary'
 import ToastContainer from '@/components/shared/ToastContainer'
 
@@ -29,8 +30,10 @@ export default function QSLayout({ children }: { children: React.ReactNode }) {
   return (
     <PageErrorBoundary>
       <NotificationProvider>
-        <BaseLayout navItems={navItems} messagesHref="/qs/messages" notificationsHref="/qs/notifications">{children}</BaseLayout>
-        <ToastContainer />
+        <ActiveProjectProvider>
+          <BaseLayout navItems={navItems} messagesHref="/qs/messages" notificationsHref="/qs/notifications">{children}</BaseLayout>
+          <ToastContainer />
+        </ActiveProjectProvider>
       </NotificationProvider>
     </PageErrorBoundary>
   )

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
 import MessagesButton from '@/components/shared/MessagesButton'
+import ProjectSwitcher from '@/components/layout/ProjectSwitcher'
 
 const IA = '#FFFFFF'
 const II = '#6B7D8D'
@@ -58,6 +59,8 @@ export default function Sidebar() {
           <NotificationBell unreadCount={unreadCount} href="/notifications" />
         </div>
       </div>
+
+      <ProjectSwitcher />
 
       <nav style={{ flex: 1, overflowY: 'auto', paddingBottom: '16px' }}>
         {navSections.map((section) => (

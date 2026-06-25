@@ -6,6 +6,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import NotificationBell from '@/components/shared/NotificationBell'
 import MessagesButton from '@/components/shared/MessagesButton'
 import MobileTopBar from '@/components/layout/MobileTopBar'
+import ProjectSwitcher from '@/components/layout/ProjectSwitcher'
 
 export interface NavItem {
   label: string
@@ -63,8 +64,10 @@ function BaseSidebar({ navItems, backButton, messagesHref, notificationsHref }: 
         </div>
       </div>
 
+      <ProjectSwitcher />
+
       {backButton && (
-        <div style={{ padding: '8px 12px 0' }}>
+        <div style={{ padding: '0 12px 0' }}>
           <button type="button" onClick={() => router.back()}
             className="sb-item"
             style={{ color: '#8FA3B3' }}>
