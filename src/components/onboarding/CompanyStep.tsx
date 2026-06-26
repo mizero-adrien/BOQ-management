@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { countries as countriesMap } from 'countries-list'
 
@@ -38,12 +37,10 @@ async function ensureProfileExists(userId: string, fullName: string): Promise<bo
 }
 
 export default function CompanyStep({ onComplete }: CompanyStepProps) {
-  const router = useRouter()
   const [name, setName] = useState('')
   const [countryCode, setCountryCode] = useState('RW')
   const [currency, setCurrency] = useState('RWF')
   const [submitting, setSubmitting] = useState(false)
-  const [skipping, setSkipping] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const countryName = useMemo(
@@ -55,28 +52,6 @@ export default function CompanyStep({ onComplete }: CompanyStepProps) {
     setCountryCode(code)
     const entry = ALL_COUNTRIES.find((c) => c.code === code)
     if (entry) setCurrency(entry.currency)
-  }
-
-  async function handleSkip() {
-    setSkipping(true)
-    setError(null)
-    const supabase = createClient()
-
-    // Refresh session first — new signups sometimes have an uninitialized token
-    const { data: refreshData } = await supabase.auth.refreshSession()
-    if (!refreshData.session) {
-      setError('Your session has expired. Please sign in again.')
-      setSkipping(false)
-      return
-    }
-
-    // Do not set role:'pm' — user has no company yet so the role would be a lie.
-    // Keep role:'pending' and has_company:false so the middleware re-routes them
-    // to onboarding on future logins until they either complete setup or accept
-    // an invite (which sets both fields correctly via update_user_role).
-    // Route directly to /no-project — bypasses /redirect which loops back to
-    // /onboarding when has_company is false.
-    router.push('/no-project?reason=new_user')
   }
 
   async function handleNext(e: React.FormEvent) {
@@ -181,20 +156,11 @@ export default function CompanyStep({ onComplete }: CompanyStepProps) {
         </Field>
         <button
           type="submit"
-          disabled={submitting || skipping}
+          disabled={submitting}
           className="w-full py-3.5 rounded-xl text-sm font-semibold text-white mt-2 disabled:opacity-60"
           style={{ backgroundColor: '#00236F' }}
         >
           {submitting ? 'Creating...' : 'Next'}
-        </button>
-        <button
-          type="button"
-          onClick={handleSkip}
-          disabled={submitting || skipping}
-          className="w-full py-2.5 text-sm font-medium disabled:opacity-50"
-          style={{ color: '#888888' }}
-        >
-          {skipping ? 'Skipping...' : 'Skip for now, set up company later'}
         </button>
       </form>
     </div>

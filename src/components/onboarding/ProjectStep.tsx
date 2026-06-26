@@ -12,15 +12,17 @@ const FIELD_STYLE = {
 interface ProjectStepProps {
   companyId: string
   onComplete: (projectId: string) => void
+  onSkip: () => void
 }
 
-export default function ProjectStep({ companyId, onComplete }: ProjectStepProps) {
+export default function ProjectStep({ companyId, onComplete, onSkip }: ProjectStepProps) {
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
   const [clientName, setClientName] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [skipping, setSkipping] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleNext(e: React.FormEvent) {
@@ -77,6 +79,22 @@ export default function ProjectStep({ companyId, onComplete }: ProjectStepProps)
     onComplete(project.id as string)
   }
 
+  async function handleSkip() {
+    setSkipping(true)
+    setError(null)
+    const supabase = createClient()
+    // CompanyStep already set role:'pm' and has_company:true in auth metadata.
+    // Refresh the session so the JWT cookie carries these values before navigating —
+    // the middleware reads the cookie, not in-memory state.
+    const { error: sessionErr } = await supabase.auth.refreshSession()
+    if (sessionErr) {
+      setError('Session refresh failed. Please try again.')
+      setSkipping(false)
+      return
+    }
+    onSkip()
+  }
+
   return (
     <div
       className="bg-white rounded-2xl p-6"
@@ -126,11 +144,20 @@ export default function ProjectStep({ companyId, onComplete }: ProjectStepProps)
         </div>
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || skipping}
           className="w-full py-3.5 rounded-xl text-sm font-semibold text-white mt-2 disabled:opacity-60"
           style={{ backgroundColor: '#00236F' }}
         >
           {submitting ? 'Creating...' : 'Next'}
+        </button>
+        <button
+          type="button"
+          onClick={handleSkip}
+          disabled={submitting || skipping}
+          className="w-full py-2.5 text-sm font-medium disabled:opacity-50"
+          style={{ color: '#888888' }}
+        >
+          {skipping ? 'Skipping...' : 'Skip for now, create project from dashboard'}
         </button>
       </form>
     </div>

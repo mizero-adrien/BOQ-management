@@ -97,6 +97,7 @@ function OnboardingContent() {
               setProjectId(id)
               setStep(3)
             }}
+            onSkip={() => router.push('/pm/dashboard')}
           />
         </>
       )}
