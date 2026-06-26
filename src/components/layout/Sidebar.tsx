@@ -2,9 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useNotifications } from '@/hooks/useNotifications'
-import NotificationBell from '@/components/shared/NotificationBell'
-import MessagesButton from '@/components/shared/MessagesButton'
 import ProjectSwitcher from '@/components/layout/ProjectSwitcher'
 
 const IA = '#FFFFFF'
@@ -38,13 +35,12 @@ const navSections: { label: string; items: SectionItem[] }[] = [
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { unreadCount } = useNotifications()
 
   return (
     <aside className="hidden md:flex md:flex-col md:flex-shrink-0"
       style={{ width: '240px', height: '100vh', position: 'sticky', top: 0, backgroundColor: '#0D1F2D' }}>
 
-      <div style={{ padding: '16px', borderBottom: '1px solid #1A2E3D', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+      <div style={{ padding: '16px', borderBottom: '1px solid #1A2E3D', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#1565D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -53,10 +49,6 @@ export default function Sidebar() {
             </svg>
           </div>
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.25 }}>Construction<br />Manager</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <MessagesButton href="/messages" />
-          <NotificationBell unreadCount={unreadCount} href="/notifications" />
         </div>
       </div>
 

@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { useActiveProject } from '@/hooks/useActiveProject'
 import { useMaterialLogs } from '@/hooks/useMaterialLogs'
 import { formatDate } from '@/lib/utils/index'
 import AppHeader from '@/components/shared/AppHeader'
@@ -32,11 +33,6 @@ function LogsEmptyState() {
   )
 }
 
-interface Project {
-  id: string
-  name: string
-}
-
 interface LowStockItem {
   id: string
   description: string
@@ -47,95 +43,61 @@ interface LowStockItem {
 }
 
 export default function StorekeeperDashboardPage() {
-  const [project, setProject] = useState<Project | null>(null)
+  const { project, loading: projectLoading } = useActiveProject()
   const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([])
-  const [loadingProject, setLoadingProject] = useState(true)
 
   const { logs, loading: logsLoading } = useMaterialLogs(project?.id)
 
   useEffect(() => {
-    async function fetchProject() {
+    if (!project?.id) { setLowStockItems([]); return }
+
+    async function fetchLowStock() {
       const supabase = createClient()
-
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setLoadingProject(false); return }
-
-      const { data: memberData, error: memberError } = await supabase
-        .from('project_members')
-        .select('project_id')
-        .eq('user_id', user.id)
-        .limit(10)
-
-      if (memberError || !memberData || memberData.length === 0) {
-        setLoadingProject(false)
-        return
-      }
-
-      const projectIds = memberData.map((m: { project_id: string }) => m.project_id)
-
-      const { data: projectData, error: projectError } = await supabase
-        .from('projects')
-        .select('id, name')
-        .in('id', projectIds)
-        .eq('status', 'active')
-        .limit(1)
-        .single()
-
-      if (projectError || !projectData) {
-        setLoadingProject(false)
-        return
-      }
-
-      setProject(projectData as Project)
 
       const { data: sectionsData } = await supabase
         .from('boq_sections')
         .select('id')
-        .eq('project_id', projectData.id)
+        .eq('project_id', project!.id)
 
-      if (sectionsData && sectionsData.length > 0) {
-        const sectionIds = sectionsData.map((s: { id: string }) => s.id)
+      if (!sectionsData || sectionsData.length === 0) return
 
-        const { data: itemsData } = await supabase
-          .from('boq_items')
-          .select('id, description, unit, quantity, used_quantity')
-          .in('section_id', sectionIds)
+      const sectionIds = sectionsData.map((s: { id: string }) => s.id)
 
-        if (itemsData) {
-          const low = itemsData
-            .filter((item: { quantity: number; used_quantity: number }) =>
-              item.quantity > 0 && (item.used_quantity / item.quantity) > 0.8
-            )
-            .map((item: { id: string; description: string; unit: string; quantity: number; used_quantity: number }) => ({
-              id: item.id,
-              description: item.description,
-              unit: item.unit,
-              quantity: item.quantity,
-              used_quantity: item.used_quantity,
-              usage: Math.round((item.used_quantity / item.quantity) * 100),
-            }))
-          setLowStockItems(low)
-        }
+      const { data: itemsData } = await supabase
+        .from('boq_items')
+        .select('id, description, unit, quantity, used_quantity')
+        .in('section_id', sectionIds)
+
+      if (itemsData) {
+        const low = itemsData
+          .filter((item: { quantity: number; used_quantity: number }) =>
+            item.quantity > 0 && (item.used_quantity / item.quantity) > 0.8
+          )
+          .map((item: { id: string; description: string; unit: string; quantity: number; used_quantity: number }) => ({
+            id: item.id,
+            description: item.description,
+            unit: item.unit,
+            quantity: item.quantity,
+            used_quantity: item.used_quantity,
+            usage: Math.round((item.used_quantity / item.quantity) * 100),
+          }))
+        setLowStockItems(low)
       }
-
-      setLoadingProject(false)
     }
 
-    fetchProject()
-  }, [])
+    fetchLowStock()
+  }, [project?.id])
 
   const todayStr = new Date().toISOString().slice(0, 10)
   const todayLogs = logs.filter((l) => l.loggedAt.startsWith(todayStr))
   const issuedToday = todayLogs.reduce((sum, l) => sum + l.quantityUsed, 0)
   const recentLogs = logs.slice(0, 10)
 
-  const loading = loadingProject || logsLoading
-
-  if (loading) {
+  if (projectLoading || logsLoading) {
     return (
       <div style={{ backgroundColor: '#F5F6FA', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#00236F', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #EEEEEE', borderTopColor: '#1565D8', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
           <p style={{ fontSize: '14px', color: '#666666' }}>Loading...</p>
         </div>
       </div>

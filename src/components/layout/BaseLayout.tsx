@@ -2,9 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useNotifications } from '@/hooks/useNotifications'
-import NotificationBell from '@/components/shared/NotificationBell'
-import MessagesButton from '@/components/shared/MessagesButton'
 import MobileTopBar from '@/components/layout/MobileTopBar'
 import ProjectSwitcher from '@/components/layout/ProjectSwitcher'
 
@@ -42,25 +39,20 @@ function LogoIcon() {
   )
 }
 
-function BaseSidebar({ navItems, backButton, messagesHref, notificationsHref }: { navItems: NavItem[]; backButton?: boolean; messagesHref?: string; notificationsHref?: string }) {
+function BaseSidebar({ navItems, backButton }: { navItems: NavItem[]; backButton?: boolean }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { unreadCount } = useNotifications()
 
   return (
     <aside className="hidden md:flex md:flex-col md:flex-shrink-0"
       style={{ width: '240px', height: '100vh', position: 'sticky', top: 0, backgroundColor: '#0D1F2D' }}>
 
-      <div style={{ padding: '16px', borderBottom: '1px solid #1A2E3D', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+      <div style={{ padding: '16px', borderBottom: '1px solid #1A2E3D', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#1565D8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <LogoIcon />
           </div>
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.25 }}>Construction<br />Manager</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {messagesHref && <MessagesButton href={messagesHref} />}
-          <NotificationBell unreadCount={unreadCount} href={notificationsHref} />
         </div>
       </div>
 
@@ -133,7 +125,7 @@ export default function BaseLayout({ children, navItems, backButton, messagesHre
   return (
     <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F4F6F8' }}>
       <MobileTopBar backButton={backButton} messagesHref={messagesHref} notificationsHref={notificationsHref} overflowItems={overflowItems} />
-      <BaseSidebar navItems={navItems} backButton={backButton} messagesHref={messagesHref} notificationsHref={notificationsHref} />
+      <BaseSidebar navItems={navItems} backButton={backButton} />
       <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">{children}</main>
       <BaseBottomNav navItems={navItems} />
     </div>
