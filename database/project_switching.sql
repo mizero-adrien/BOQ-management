@@ -46,14 +46,16 @@ $$;
 grant execute on function update_user_role(uuid, user_role, uuid) to authenticated;
 
 -- Returns all active/on_hold projects for a user with their role on each project
-create or replace function get_user_projects(p_user_id uuid)
+-- Drop first because CREATE OR REPLACE cannot change return type
+drop function if exists get_user_projects(uuid);
+create function get_user_projects(p_user_id uuid)
 returns table (
   project_id uuid,
   project_name text,
   project_status text,
   project_location text,
   overall_progress numeric,
-  user_role user_role,
+  user_role text,
   assigned_at timestamptz,
   company_name text,
   pm_name text,
@@ -67,14 +69,14 @@ begin
   return query
   select
     p.id as project_id,
-    p.name as project_name,
-    p.status as project_status,
-    p.location as project_location,
+    p.name::text as project_name,
+    p.status::text as project_status,
+    p.location::text as project_location,
     p.overall_progress,
-    pm.role as user_role,
+    pm.role::text as user_role,
     pm.assigned_at,
-    c.name as company_name,
-    prof.full_name as pm_name,
+    c.name::text as company_name,
+    prof.full_name::text as pm_name,
     p.pm_id
   from project_members pm
   join projects p on p.id = pm.project_id
