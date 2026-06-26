@@ -40,7 +40,7 @@ declare
 begin
   select role::text into v_user_role
   from profiles
-  where id = auth.uid();
+  where profiles.id = auth.uid();
 
   if v_user_role in ('pm', 'qs') then
     return query
