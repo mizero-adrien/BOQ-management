@@ -70,18 +70,13 @@ export default function CompanyStep({ onComplete }: CompanyStepProps) {
       return
     }
 
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { onboarding_skipped: true, role: 'pm' },
-    })
-
-    if (updateError) {
-      console.error('Skip failed:', updateError.message)
-      setError('Could not save your preference. Please try again.')
-      setSkipping(false)
-      return
-    }
-
-    router.push('/redirect')
+    // Do not set role:'pm' — user has no company yet so the role would be a lie.
+    // Keep role:'pending' and has_company:false so the middleware re-routes them
+    // to onboarding on future logins until they either complete setup or accept
+    // an invite (which sets both fields correctly via update_user_role).
+    // Route directly to /no-project — bypasses /redirect which loops back to
+    // /onboarding when has_company is false.
+    router.push('/no-project?reason=new_user')
   }
 
   async function handleNext(e: React.FormEvent) {
