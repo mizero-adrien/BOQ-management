@@ -86,18 +86,12 @@ function SignupForm() {
   return (
     <div className="w-full">
 
-      <div className="flex flex-col items-center mb-8">
-        <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-          style={{ backgroundColor: '#1565D8' }}
-        >
-          <BuildingIcon />
-        </div>
+      <div className="mb-8">
         <h1
           className="text-2xl font-semibold mb-1"
           style={{ color: '#1A2332' }}
         >
-          Create account
+          Create your account
         </h1>
         <p className="text-sm text-gray-500">
           Join your construction team
@@ -300,17 +294,6 @@ export default function SignupPage() {
     >
       <SignupForm />
     </Suspense>
-  )
-}
-
-function BuildingIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <path d="M9 22V12h6v10" />
-      <path d="M9 7h1" /><path d="M14 7h1" />
-      <path d="M9 11h1" /><path d="M14 11h1" />
-    </svg>
   )
 }
 
