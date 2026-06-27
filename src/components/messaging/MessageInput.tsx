@@ -76,7 +76,7 @@ export default function MessageInput({ onSend, placeholder = 'Type a message...'
           borderRadius: '50%',
           backgroundColor: canSend ? '#00236F' : '#EEEEEE',
           border: 'none',
-          cursor: canSend ? 'pointer' : 'default',
+          cursor: canSend ? 'pointer' : 'not-allowed',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

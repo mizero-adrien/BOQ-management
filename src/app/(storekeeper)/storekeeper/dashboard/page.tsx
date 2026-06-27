@@ -8,7 +8,6 @@ import { createClient } from '@/lib/supabase/client'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useMaterialLogs } from '@/hooks/useMaterialLogs'
 import { formatDate } from '@/lib/utils/index'
-import AppHeader from '@/components/shared/AppHeader'
 
 function LogsEmptyState() {
   return (
@@ -117,14 +116,6 @@ export default function StorekeeperDashboardPage() {
 
   return (
     <>
-      <AppHeader
-        title="Store Dashboard"
-        subtitle={project.name}
-        messagesHref="/storekeeper/messages"
-        notificationsHref="/storekeeper/notifications"
-        profileHref="/storekeeper/profile"
-        settingsHref="/storekeeper/profile"
-      />
       <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '24px 20px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 

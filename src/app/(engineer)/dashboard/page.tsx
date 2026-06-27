@@ -7,13 +7,11 @@ import { useProfile } from '@/hooks/useProfile'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useTodayTasks } from '@/hooks/useTodayTasks'
 import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import ReportDueBanner from '@/components/engineer/ReportDueBanner'
 import DashboardStatCard from '@/components/engineer/DashboardStatCard'
 import TaskItem from '@/components/engineer/TaskItem'
 import { DashboardSkeleton, TasksSkeleton } from '@/components/engineer/DashboardSkeleton'
-import AppHeader from '@/components/shared/AppHeader'
 
 export default function DashboardPage() {
   const { profile, loading: profileLoading } = useProfile()
@@ -58,28 +56,12 @@ export default function DashboardPage() {
     fetchStats()
   }, [project?.id, profile?.id])
 
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-  const firstName = profile?.full_name?.split(' ')[0] ?? 'there'
-  const initials = (profile?.full_name ?? '')
-    .split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
-  const today = formatDate(new Date().toISOString())
-
   if (profileLoading) {
     return <DashboardSkeleton />
   }
 
   return (
-    <>
-      <AppHeader
-        title={`${greeting}, ${firstName}`}
-        subtitle={today}
-        messagesHref="/messages"
-        notificationsHref="/notifications"
-        profileHref="/profile"
-        settingsHref="/profile"
-      />
-      <div className="min-h-screen" style={{ backgroundColor: '#F4F6F8' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#F4F6F8' }}>
       <div className="px-4 py-4 space-y-4">
         <ReportDueBanner />
 
@@ -132,7 +114,6 @@ export default function DashboardPage() {
           Submit today's report
         </Link>
       </div>
-      </div>
-    </>
+    </div>
   )
 }

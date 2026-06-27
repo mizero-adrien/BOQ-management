@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation'
 import { usePMProjects } from '@/hooks/usePMProjects'
 import { useTodayReports } from '@/hooks/useTodayReports'
 import { usePMStats } from '@/hooks/usePMStats'
-import { formatDate } from '@/lib/utils'
 import StatCard from '@/components/pm/StatCard'
 import ProjectCard from '@/components/pm/ProjectCard'
 import ReportRow from '@/components/pm/ReportRow'
@@ -17,7 +16,6 @@ import MobileProfileCard from '@/components/pm/MobileProfileCard'
 import { EmptyCard, InfoIcon, XSmallIcon } from '@/components/shared/DashboardUtils'
 import { SkeletonStats, SkeletonCard, SkeletonTable } from '@/components/shared/Skeleton'
 import ProcurementWidget from '@/components/pm/ProcurementWidget'
-import AppHeader from '@/components/shared/AppHeader'
 
 const PlusIcon = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -45,7 +43,6 @@ export default function PMDashboardPage() {
 
   const hasDemo = projects.some((p) => p.is_demo === true)
   const isLoading = projectsLoading || reportsLoading
-  const today = formatDate(new Date().toISOString())
   const q = searchQuery.trim().toLowerCase()
 
   const filteredProjects = projects.filter((p) =>
@@ -59,45 +56,51 @@ export default function PMDashboardPage() {
   const issueReports = filteredReports.filter((r) => r.issues !== null && r.issues.trim() !== '')
 
   return (
-    <>
-      <AppHeader
-        title="Dashboard"
-        subtitle={today}
-        searchPlaceholder="Search projects or engineers..."
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
-        messagesHref="/pm/messages"
-        notificationsHref="/pm/notifications"
-        profileHref="/pm/profile"
-        settingsHref="/pm/settings"
-      />
+    <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '900px', margin: '0 auto' }}>
 
-      <div className="px-4 py-5 md:px-8 md:py-8" style={{ maxWidth: '900px', margin: '0 auto' }}>
-
-        {/* Action buttons row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '20px', gap: '8px' }}>
-          <button
-            type="button"
-            onClick={() => router.push('/pm/projects/new')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '8px 14px', backgroundColor: '#1565D8', color: '#FFFFFF',
-              border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-            }}>
-            {PlusIcon}
-            New project
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push('/pm/team')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '8px 14px', backgroundColor: '#FFFFFF', color: '#1A2332',
-              border: '1px solid #DDE3E8', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-            }}>
-            {PersonPlusIcon}
-            Invite team
-          </button>
+        {/* Search + action buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', gap: '12px' }}>
+          <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
+            <svg style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+              width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8FA3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search projects or engineers..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%', padding: '7px 12px 7px 32px', fontSize: '13px',
+                backgroundColor: '#FFFFFF', border: '1px solid #DDE3E8',
+                borderRadius: '6px', color: '#1A2332', outline: 'none',
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => router.push('/pm/projects/new')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 14px', backgroundColor: '#1565D8', color: '#FFFFFF',
+                border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+              }}>
+              {PlusIcon}
+              New project
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/pm/team')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 14px', backgroundColor: '#FFFFFF', color: '#1A2332',
+                border: '1px solid #DDE3E8', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+              }}>
+              {PersonPlusIcon}
+              Invite team
+            </button>
+          </div>
         </div>
         {hasDemo && !demoBannerDismissed && (
           <div
@@ -189,7 +192,6 @@ export default function PMDashboardPage() {
         </div>
 
         <MobileProfileCard />
-      </div>
-    </>
+    </div>
   )
 }

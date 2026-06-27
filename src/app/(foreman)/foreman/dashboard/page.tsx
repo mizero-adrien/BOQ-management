@@ -8,17 +8,8 @@ import { useProfile } from '@/hooks/useProfile'
 import { useActiveProject } from '@/hooks/useActiveProject'
 import { useProjectMembers } from '@/hooks/useProjectMembers'
 import { useProjectTasks } from '@/hooks/useProjectTasks'
-import { formatDate, formatCurrency } from '@/lib/utils/index'
 import { createClient } from '@/lib/supabase/client'
 import { SkeletonStats, SkeletonTable } from '@/components/shared/Skeleton'
-import AppHeader from '@/components/shared/AppHeader'
-
-function greeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
-}
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; bg: string; color: string }> = {
@@ -42,8 +33,6 @@ export default function ForemanDashboardPage() {
   const [present, setPresent] = useState(0)
 
   const engineers = members.filter((m) => m.role === 'engineer')
-  const firstName = profile?.full_name?.split(' ')[0] ?? 'there'
-  const today = formatDate(new Date().toISOString())
   const activeTasks = tasks.filter((t) => t.status !== 'done').slice(0, 5)
 
   useEffect(() => {
@@ -70,16 +59,7 @@ export default function ForemanDashboardPage() {
   }
 
   return (
-    <>
-      <AppHeader
-        title={`${greeting()}, ${firstName}`}
-        subtitle={project ? project.name : today}
-        messagesHref="/foreman/messages"
-        notificationsHref="/foreman/notifications"
-        profileHref="/foreman/profile"
-        settingsHref="/foreman/profile"
-      />
-      <div className="min-h-screen" style={{ backgroundColor: '#F4F6F8' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#F4F6F8' }}>
       <div className="px-4 py-4 space-y-4">
         {/* Crew summary */}
         <div className="bg-white rounded-xl p-5" style={{ border: '0.5px solid #EEEEEE' }}>
@@ -132,7 +112,6 @@ export default function ForemanDashboardPage() {
           Submit crew report
         </Link>
       </div>
-      </div>
-    </>
+    </div>
   )
 }

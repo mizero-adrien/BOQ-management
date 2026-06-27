@@ -63,6 +63,42 @@
     font-family: inherit;
     font-size: inherit;
   }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  select {
+    cursor: pointer;
+  }
+
+  label {
+    cursor: pointer;
+  }
+
+  input[type="date"],
+  input[type="month"],
+  input[type="week"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="range"],
+  input[type="color"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    cursor: pointer;
+  }
 }
 
 @layer components {

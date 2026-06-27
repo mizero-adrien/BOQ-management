@@ -10,7 +10,6 @@ import AddExistingUserTab from '@/components/pm/team/AddExistingUserTab'
 import TeamMembersList from '@/components/pm/team/TeamMembersList'
 import NoProjectsEmptyState from '@/components/pm/NoProjectsEmptyState'
 import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
-import PMTopBar from '@/components/pm/PMTopBar'
 
 type TabId = 'add' | 'invite'
 
@@ -55,7 +54,6 @@ export default function TeamPage() {
 
   return (
     <>
-      <PMTopBar title="Team" />
       <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
 

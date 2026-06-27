@@ -41,13 +41,6 @@ export default function BOQPage() {
 
   return (
     <div style={{ backgroundColor: '#F5F6FA' }}>
-      <div className="bg-white pt-4 pb-3 px-4 border-b" style={{ borderColor: '#EEEEEE' }}>
-        <h1 className="text-xl font-semibold" style={{ color: '#111111' }}>BOQ Tracker</h1>
-        <p className="text-sm mt-0.5" style={{ color: '#666666' }}>
-          {projectLoading ? '' : project ? project.name : 'No project assigned'}
-        </p>
-      </div>
-
       {projectLoading || sectionsLoading ? (
         <div className="px-4 pt-5"><SkeletonStats count={2} /><SkeletonTable rows={4} /></div>
       ) : !project ? (

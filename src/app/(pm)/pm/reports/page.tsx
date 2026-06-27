@@ -11,7 +11,6 @@ import ReportCard from '@/components/pm/ReportCard'
 import NoProjectsEmptyState from '@/components/pm/NoProjectsEmptyState'
 import ProjectsFetchError from '@/components/pm/ProjectsFetchError'
 import { SkeletonTable } from '@/components/shared/Skeleton'
-import PMTopBar from '@/components/pm/PMTopBar'
 
 function sevenDaysAgo() {
   const d = new Date()
@@ -65,17 +64,10 @@ export default function PMReportsPage() {
 
   return (
     <>
-      <PMTopBar
-        title="Reports"
-        searchPlaceholder="Search by engineer name"
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
-
       <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-          {/* Filters (no search input here — moved to top bar) */}
+          {/* Filters */}
           <div className="flex flex-wrap items-center gap-2.5 mb-5">
             <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
               className="px-3 py-2 text-sm rounded-lg outline-none w-full md:w-[200px]"
@@ -102,6 +94,24 @@ export default function PMReportsPage() {
                   {label}
                 </button>
               ))}
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <svg style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8FA3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search by engineer name"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: '7px 12px 7px 32px', fontSize: '13px',
+                  backgroundColor: '#FFFFFF', border: '1px solid #DDE3E8',
+                  borderRadius: '6px', color: '#1A2332', outline: 'none', width: '200px',
+                }}
+              />
             </div>
 
             <button type="button" onClick={resetFilters} className="text-sm ml-auto" style={{ color: '#666666' }}>

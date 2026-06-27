@@ -43,7 +43,11 @@ export function useEngineerReports(month?: string) {
         .order('report_date', { ascending: false })
 
       if (month) {
-        query = query.gte('report_date', `${month}-01`).lte('report_date', `${month}-31`)
+        const [y, mo] = month.split('-').map(Number)
+        const nextMo = mo === 12 ? 1 : mo + 1
+        const nextY = mo === 12 ? y + 1 : y
+        const nextMonthStart = `${nextY}-${String(nextMo).padStart(2, '0')}-01`
+        query = query.gte('report_date', `${month}-01`).lt('report_date', nextMonthStart)
       }
 
       const { data } = await query

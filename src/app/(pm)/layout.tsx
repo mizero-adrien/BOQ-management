@@ -1,6 +1,7 @@
 import PMSidebar from '@/components/layout/PMSidebar'
 import PMBottomNav from '@/components/layout/PMBottomNav'
 import MobileTopBar from '@/components/layout/MobileTopBar'
+import PMLayoutHeader from '@/components/layout/PMLayoutHeader'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import { ActiveProjectProvider } from '@/contexts/ActiveProjectContext'
 import PageErrorBoundary from '@/components/shared/PageErrorBoundary'
@@ -22,6 +23,7 @@ export default function PMLayout({ children }: { children: React.ReactNode }) {
             <MobileTopBar messagesHref="/pm/messages" notificationsHref="/pm/notifications" overflowItems={pmOverflowItems} />
             <PMSidebar />
             <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">
+              <PMLayoutHeader />
               {children}
             </main>
             <PMBottomNav />

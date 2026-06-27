@@ -9,7 +9,6 @@ import { usePMProjects } from '@/hooks/usePMProjects'
 import type { ProjectStatus } from '@/types/database'
 import ProjectFullCard from '@/components/pm/projects/ProjectFullCard'
 import { SkeletonCard } from '@/components/shared/Skeleton'
-import PMTopBar from '@/components/pm/PMTopBar'
 
 type Filter = 'all' | ProjectStatus
 
@@ -50,18 +49,28 @@ export default function PMProjectsPage() {
 
   return (
     <>
-      <PMTopBar
-        title="Projects"
-        searchPlaceholder="Search projects"
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-
       <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px 20px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
-          {/* Action row */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          {/* Search + action row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', gap: '12px' }}>
+            <div style={{ position: 'relative', flex: 1, maxWidth: '280px' }}>
+              <svg style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8FA3B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search projects"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%', padding: '7px 12px 7px 32px', fontSize: '13px',
+                  backgroundColor: '#FFFFFF', border: '1px solid #DDE3E8',
+                  borderRadius: '6px', color: '#1A2332', outline: 'none',
+                }}
+              />
+            </div>
             <button
               type="button"
               onClick={() => router.push('/pm/projects/new')}

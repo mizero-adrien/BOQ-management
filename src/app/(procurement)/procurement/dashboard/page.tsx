@@ -9,7 +9,6 @@ import ProcurementStatCards from '@/components/procurement/ProcurementStatCards'
 import PendingApprovalsList from '@/components/procurement/PendingApprovalsList'
 import OverdueDeliveriesList from '@/components/procurement/OverdueDeliveriesList'
 import RecentProcurementActivity from '@/components/procurement/RecentProcurementActivity'
-import AppHeader from '@/components/shared/AppHeader'
 
 export default function ProcurementDashboardPage() {
   const { requests, loading: reqLoading } = usePurchaseRequests()
@@ -34,14 +33,6 @@ export default function ProcurementDashboardPage() {
 
   return (
     <>
-      <AppHeader
-        title="Procurement"
-        subtitle={new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        messagesHref="/procurement/messages"
-        notificationsHref="/procurement/notifications"
-        profileHref="/procurement/profile"
-        settingsHref="/procurement/profile"
-      />
       <div style={{ backgroundColor: '#F4F6F8', minHeight: '100vh', padding: '32px 20px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
 

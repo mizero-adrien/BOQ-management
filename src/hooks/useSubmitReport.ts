@@ -103,6 +103,7 @@ export function useSubmitReport() {
         return
       }
 
+      let photosFailed = 0
       for (const file of data.photos) {
         const timestamp = Date.now()
         const path = `${data.project.id}/${report.id}/${timestamp}-${file.name}`
@@ -111,7 +112,10 @@ export function useSubmitReport() {
           .from('report-photos')
           .upload(path, file)
 
-        if (uploadError) continue
+        if (uploadError) {
+          photosFailed++
+          continue
+        }
 
         const { data: urlData } = await supabase.storage
           .from('report-photos')
@@ -136,7 +140,12 @@ export function useSubmitReport() {
         action_url: `/pm/reports`,
       })
 
-      toast.success('Report submitted', 'Your daily report has been saved')
+      const photoMsg = data.photos.length > 0 && photosFailed === data.photos.length
+        ? 'Report saved — photos could not be uploaded'
+        : photosFailed > 0
+          ? `Report saved — ${data.photos.length - photosFailed}/${data.photos.length} photos uploaded`
+          : 'Your daily report has been saved'
+      toast.success('Report submitted', photoMsg)
       router.push('/dashboard')
       router.refresh()
     } catch {

@@ -31,8 +31,7 @@ export default function ReportHistoryPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F6FA' }}>
-      <div className="bg-white border-b px-4 pt-12 pb-4" style={{ borderColor: '#EEEEEE' }}>
-        <h1 className="text-xl font-semibold mb-3" style={{ color: '#111111' }}>Report history</h1>
+      <div className="bg-white border-b px-4 py-3" style={{ borderColor: '#EEEEEE' }}>
         <input type="month" value={month} onChange={(e) => setMonth(e.target.value)}
           className="text-sm px-3 py-2 rounded-lg"
           style={{ border: '1px solid #EEEEEE', color: '#111111', backgroundColor: '#F5F6FA', outline: 'none' }} />

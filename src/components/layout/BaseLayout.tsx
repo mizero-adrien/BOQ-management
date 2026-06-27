@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import MobileTopBar from '@/components/layout/MobileTopBar'
 import ProjectSwitcher from '@/components/layout/ProjectSwitcher'
+import AppHeader from '@/components/shared/AppHeader'
+import { useActiveProject } from '@/hooks/useActiveProject'
 
 export interface NavItem {
   label: string
@@ -120,13 +122,43 @@ function BaseBottomNav({ navItems }: { navItems: NavItem[] }) {
   )
 }
 
+function LayoutHeader({ navItems, messagesHref, notificationsHref }: {
+  navItems: NavItem[]
+  messagesHref?: string
+  notificationsHref?: string
+}) {
+  const pathname = usePathname()
+  const { project } = useActiveProject()
+
+  const active = navItems
+    .filter((item) => navIsActive(pathname, item.href, item.exact))
+    .sort((a, b) => b.href.length - a.href.length)[0]
+
+  const profileItem = navItems.find((item) => item.section === 'ACCOUNT')
+  const profileHref = profileItem?.href ?? '/profile'
+
+  return (
+    <AppHeader
+      title={active?.label ?? ''}
+      subtitle={project?.name}
+      messagesHref={messagesHref ?? '/messages'}
+      notificationsHref={notificationsHref ?? '/notifications'}
+      profileHref={profileHref}
+      settingsHref={profileHref}
+    />
+  )
+}
+
 export default function BaseLayout({ children, navItems, backButton, messagesHref, notificationsHref }: BaseLayoutProps) {
   const overflowItems = navItems.slice(5).map((item) => ({ label: item.label, href: item.href }))
   return (
     <div className="min-h-screen flex flex-col md:flex-row" style={{ backgroundColor: '#F4F6F8' }}>
       <MobileTopBar backButton={backButton} messagesHref={messagesHref} notificationsHref={notificationsHref} overflowItems={overflowItems} />
       <BaseSidebar navItems={navItems} backButton={backButton} />
-      <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">{children}</main>
+      <main className="flex-1 min-w-0 w-full pb-20 pt-14 md:pt-0 md:pb-0">
+        <LayoutHeader navItems={navItems} messagesHref={messagesHref} notificationsHref={notificationsHref} />
+        {children}
+      </main>
       <BaseBottomNav navItems={navItems} />
     </div>
   )
