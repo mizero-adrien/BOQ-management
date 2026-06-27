@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           padding: '40px 24px',
           backgroundColor: '#FFFFFF',
         }}
-        className="w-full flex-none md:w-[40%]"
+        className="w-full flex-none md:w-[60%]"
       >
         <div style={{ width: '100%', maxWidth: '380px' }}>
           {children}
