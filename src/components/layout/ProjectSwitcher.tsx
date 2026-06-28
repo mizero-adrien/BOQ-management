@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
 import { useActiveProjectContext } from '@/contexts/ActiveProjectContext'
 import { formatRole } from '@/lib/utils/roleLabels'
 
@@ -82,14 +81,10 @@ export default function ProjectSwitcher() {
             )
           })}
 
-          <div style={{ borderTop: '1px solid #0D1F2D', padding: '6px 12px 8px' }}>
-            <Link href="/invite"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#8FA3B3', textDecoration: 'none', padding: '6px 0' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Join another project
-            </Link>
+          <div style={{ borderTop: '1px solid #0D1F2D', padding: '8px 12px' }}>
+            <p style={{ fontSize: '11px', color: '#4A6072', margin: 0, lineHeight: '1.5' }}>
+              Ask your PM for an invite link to join another project.
+            </p>
           </div>
         </div>
       )}

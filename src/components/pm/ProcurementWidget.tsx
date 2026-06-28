@@ -21,7 +21,7 @@ export default function ProcurementWidget() {
         <p className="text-sm font-semibold" style={{ color: '#111111' }}>
           Purchase requests awaiting approval
         </p>
-        <Link href="/procurement/requests" className="text-xs font-medium" style={{ color: '#EF9F27' }}>
+        <Link href="/pm/procurement/requests" className="text-xs font-medium" style={{ color: '#EF9F27' }}>
           View all
         </Link>
       </div>
@@ -29,7 +29,7 @@ export default function ProcurementWidget() {
         {pending.slice(0, 3).map((req) => (
           <Link
             key={req.id}
-            href={`/procurement/requests/${req.id}`}
+            href={`/pm/procurement/requests/${req.id}`}
             className="flex items-center justify-between rounded-lg px-3 py-2.5 bg-white"
             style={{ border: '1px solid #EEEEEE' }}
           >
