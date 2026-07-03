@@ -73,7 +73,8 @@ export default function TeamMembersList({ projects, loading }: Props) {
       target_project_id: selectedProjectId,
     })
     if (error) {
-      toast.error('Could not change role', error.message)
+      console.error('[TeamMembersList] update_user_role error:', error.message)
+      toast.error('Could not change role', 'Something went wrong. Please try again.')
     } else {
       setMembers((prev) => prev.map((m) => m.id === memberId ? { ...m, role: newRole } : m))
       toast.success('Role updated')
