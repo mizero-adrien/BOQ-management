@@ -22,8 +22,9 @@ function RedirectContent() {
     async function go() {
       const supabase = createClient()
 
-      const { data: { user }, error } = await supabase.auth.getUser()
-      if (error || !user) { router.replace('/login'); return }
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user ?? null
+      if (!user) { router.replace('/login'); return }
 
       const hasCompany = user.user_metadata?.has_company as boolean | undefined
       if (!hasCompany) { router.replace('/onboarding'); return }

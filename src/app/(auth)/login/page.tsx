@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -38,6 +38,12 @@ function LoginForm() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'auth_failed') {
+      setServerError('We couldn\'t sign you in with Google. Please try again, or sign in with your email and password.')
+    }
+  }, [searchParams])
 
   async function onSubmit(data: LoginFormData) {
     setServerError(null)
