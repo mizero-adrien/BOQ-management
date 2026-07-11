@@ -10,7 +10,7 @@ export function useSignOut() {
   async function signOut() {
     toast.info('Signing out...')
     const supabase = createClient()
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
     router.push('/login')
     router.refresh()
   }

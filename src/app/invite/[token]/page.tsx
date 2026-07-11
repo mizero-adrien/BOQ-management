@@ -252,7 +252,7 @@ export default function InvitePage() {
 
   async function handleSignOut() {
     const supabase = createClient()
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
     setCurrentUserId(null)
     setCurrentUserName('')
     setPageState('not_logged_in')

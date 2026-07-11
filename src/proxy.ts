@@ -80,6 +80,13 @@ export async function proxy(request: NextRequest) {
   const onboardingSkipped = user.user_metadata?.onboarding_skipped as boolean | undefined
   const role = (user.user_metadata?.role as string) ?? ''
 
+  if (pathname.startsWith('/admin')) {
+    if (role !== 'super_admin' && role !== 'admin') {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    return supabaseResponse
+  }
+
   if (
     !hasCompany && !onboardingSkipped &&
     !pathname.startsWith('/onboarding') &&

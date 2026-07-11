@@ -1,4 +1,4 @@
-export type UserRole = 'engineer' | 'pm' | 'owner' | 'foreman' | 'qs' | 'storekeeper' | 'procurement'
+export type UserRole = 'engineer' | 'pm' | 'owner' | 'foreman' | 'qs' | 'storekeeper' | 'procurement' | 'pending' | 'admin' | 'super_admin'
 
 export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'cancelled'
 

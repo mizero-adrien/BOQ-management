@@ -65,7 +65,7 @@ export default function ProfilePage() {
 
   async function signOut() {
     const supabase = createClient()
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
     router.replace('/login')
   }
 
